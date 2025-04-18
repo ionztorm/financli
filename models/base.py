@@ -49,8 +49,7 @@ class Table:
             wrap_error(QueryExecutionError, "Failed to fetch records")(e)
 
     def _create(self, data: dict[str, str]) -> None:
-        if not self._validate_data(data):
-            raise ValidationError("Data did not pass validation.")
+        self._validate_data(data)
 
         placeholders = ", ".join("?" for _ in self.table_columns)
         col_list = ", ".join(self.table_columns)
@@ -60,11 +59,7 @@ class Table:
             f"VALUES({placeholders})"
         )
 
-        result = self._execute_query(query, values)
-
-        if not result:
-            raise QueryExecutionError("Failed to create record.")
-
+        self._execute_query(query, values)
         self._connection.commit()
 
     def _update(self, id: int, data: dict[str, str]) -> None:
@@ -88,11 +83,7 @@ class Table:
             f"UPDATE {self._table_name.value} SET {assignments} WHERE id = ?"  # noqa: S608
         )
 
-        result = self._execute_query(query, (*values, id))
-
-        if not result:
-            raise QueryExecutionError("Failed to update record.")
-
+        self._execute_query(query, (*values, id))
         self._connection.commit()
 
     def _delete(self, id: int) -> None:
@@ -102,11 +93,7 @@ class Table:
             )
 
         query = f"DELETE FROM {self._table_name.value} WHERE id = ?"  # noqa: S608
-        result = self._execute_query(query, (id,))
-
-        if not result:
-            raise QueryExecutionError("Delete operation failed.")
-
+        self._execute_query(query, (id,))
         self._connection.commit()
 
     def _row_to_dict(self, row: sqlite3.Row) -> dict[str, str]:
@@ -125,7 +112,7 @@ class Table:
         )
         return self._cursor.fetchone() is not None
 
-    def _validate_data(self, data: dict[str, str]) -> bool:
+    def _validate_data(self, data: dict[str, str]) -> None:
         missing_fields = [
             field
             for field in self.required_columns
@@ -135,13 +122,9 @@ class Table:
             raise ValidationError(
                 f"Missing required fields: {', '.join(missing_fields)}"
             )
-        return True
 
-    def _execute_query(
-        self, query: str, params: tuple = ()
-    ) -> sqlite3.Cursor | None:
+    def _execute_query(self, query: str, params: tuple = ()) -> None:
         try:
             self._cursor.execute(query, params)
         except sqlite3.Error as e:
             wrap_error(QueryExecutionError, "Database error")(e)
-        return self._cursor
