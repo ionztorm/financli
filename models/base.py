@@ -1,7 +1,12 @@
 import sqlite3
 
 from utils.types import TableName
-from utils.helpers import msg
+from utils.exceptions.db import (
+    ValidationError,
+    ColumnMismatchError,
+    QueryExecutionError,
+    RecordNotFoundError,
+)
 
 
 class Table:
@@ -28,27 +33,24 @@ class Table:
                 (id,),
             )
             row = self._cursor.fetchone()
-            result = self._row_to_dict(row) if row else None
-
-            if not result:
+            if not row:
                 return []
-            return [result]
-        except ValueError as e:
-            msg(f"Error: {e}")
-            return []
+
+            return [self._row_to_dict(row)]
+        except sqlite3.Error as e:
+            raise QueryExecutionError(f"Failed to fetch record: {e}") from e
 
     def get_many(self) -> list[dict[str, str]]:
         try:
             self._cursor.execute(f"SELECT * FROM {self._table_name.value}")  # noqa: S608
             rows = self._cursor.fetchall()
             return [self._row_to_dict(row) for row in rows]
-        except ValueError as e:
-            msg(f"Error: {e}")
-            return []
+        except sqlite3.Error as e:
+            raise QueryExecutionError(f"Failed to fetch records: {e}") from e
 
-    def _create(self, data: dict) -> bool:
+    def _create(self, data: dict[str, str]) -> None:
         if not self._validate_data(data):
-            return False
+            raise ValidationError("Data did not pass validation.")
 
         placeholders = ", ".join("?" for _ in self.table_columns)
         col_list = ", ".join(self.table_columns)
@@ -60,58 +62,61 @@ class Table:
 
         result = self._execute_query(query, values)
 
-        if result:
-            self._connection.commit()
-            return True
-        return False
+        if not result:
+            raise QueryExecutionError("Failed to create record.")
 
-    def _update(self, id: int, data: dict) -> bool:
+        self._connection.commit()
+
+    def _update(self, id: int, data: dict[str, str]) -> None:
         if not self.exists(id):
-            return False
+            raise RecordNotFoundError(f"Record with ID {id} does not exist.")
 
         update_columns = [
             col for col in data.keys() if col in self.table_columns
         ]
-        assignments = ", ".join(f"{col} = ?" for col in update_columns)
-        current = self.get_one(id)
+        if not update_columns:
+            raise ValidationError("No valid fields to update.")
 
+        current = self.get_one(id)
         if not current:
-            msg(f"No item found with an id {id}")
-            return False
+            raise RecordNotFoundError(f"No item found with ID {id}.")
 
         values = tuple(
             data[col] if data[col] is not None else current[0][col]
             for col in update_columns
         )
+        assignments = ", ".join(f"{col} = ?" for col in update_columns)
         query = (
             f"UPDATE {self._table_name.value} SET {assignments} WHERE id = ?"  # noqa: S608
         )
 
         result = self._execute_query(query, (*values, id))
 
-        if result:
-            self._connection.commit()
-            return True
-        return False
+        if not result:
+            raise QueryExecutionError("Failed to update record.")
 
-    def _delete(self, id: int) -> bool:
+        self._connection.commit()
+
+    def _delete(self, id: int) -> None:
         if not self.exists(id):
-            return False
+            raise RecordNotFoundError(
+                f"Cannot delete: record with ID {id} does not exist."
+            )
 
         query = f"DELETE FROM {self._table_name.value} WHERE id = ?"  # noqa: S608
         result = self._execute_query(query, (id,))
 
-        if result:
-            self._connection.commit()
-            return True
-        return False
+        if not result:
+            raise QueryExecutionError("Delete operation failed.")
+
+        self._connection.commit()
 
     def _row_to_dict(self, row: sqlite3.Row) -> dict[str, str]:
         column_names = [column[0] for column in self._cursor.description]
         if len(column_names) != len(row):
-            raise ValueError(
+            raise ColumnMismatchError(
                 f"Column mismatch: expected {len(column_names)} columns, "
-                f"got {len(row)}"
+                "got {len(row)}"
             )
         return dict(zip(column_names, row))
 
@@ -129,11 +134,9 @@ class Table:
             if field not in data or data[field] is None
         ]
         if missing_fields:
-            msg("Error: The following required fields are required: ")
-            for field in missing_fields:
-                print(f" - {field}")
-            return False
-
+            raise ValidationError(
+                f"Missing required fields: {', '.join(missing_fields)}"
+            )
         return True
 
     def _execute_query(
@@ -142,6 +145,5 @@ class Table:
         try:
             self._cursor.execute(query, params)
         except sqlite3.Error as e:
-            msg(f"Database error: {e}")
-            return None
+            raise QueryExecutionError(f"Database error: {e}") from e
         return self._cursor
