@@ -1,6 +1,7 @@
 import sqlite3
 
 from utils.types import TableName
+from utils.helpers import wrap_error
 from utils.exceptions.db import (
     ValidationError,
     ColumnMismatchError,
@@ -34,11 +35,10 @@ class Table:
             )
             row = self._cursor.fetchone()
             if not row:
-                return []
-
+                raise RecordNotFoundError(f"No record found with ID {id}.")
             return [self._row_to_dict(row)]
         except sqlite3.Error as e:
-            raise QueryExecutionError(f"Failed to fetch record: {e}") from e
+            wrap_error(QueryExecutionError, "Failed to fetch record")(e)
 
     def get_many(self) -> list[dict[str, str]]:
         try:
@@ -46,7 +46,7 @@ class Table:
             rows = self._cursor.fetchall()
             return [self._row_to_dict(row) for row in rows]
         except sqlite3.Error as e:
-            raise QueryExecutionError(f"Failed to fetch records: {e}") from e
+            wrap_error(QueryExecutionError, "Failed to fetch records")(e)
 
     def _create(self, data: dict[str, str]) -> None:
         if not self._validate_data(data):
@@ -78,8 +78,6 @@ class Table:
             raise ValidationError("No valid fields to update.")
 
         current = self.get_one(id)
-        if not current:
-            raise RecordNotFoundError(f"No item found with ID {id}.")
 
         values = tuple(
             data[col] if data[col] is not None else current[0][col]
@@ -116,7 +114,7 @@ class Table:
         if len(column_names) != len(row):
             raise ColumnMismatchError(
                 f"Column mismatch: expected {len(column_names)} columns, "
-                "got {len(row)}"
+                f"got {len(row)}"
             )
         return dict(zip(column_names, row))
 
@@ -145,5 +143,5 @@ class Table:
         try:
             self._cursor.execute(query, params)
         except sqlite3.Error as e:
-            raise QueryExecutionError(f"Database error: {e}") from e
+            wrap_error(QueryExecutionError, "Database error")(e)
         return self._cursor
