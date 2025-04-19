@@ -1,6 +1,7 @@
 import json
-from pathlib import Path
+
 from typing import Callable, NoReturn
+from pathlib import Path
 from functools import wraps
 
 CONFIG_DIR = Path.home() / ".config" / "budget_cli"
