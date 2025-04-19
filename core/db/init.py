@@ -7,7 +7,7 @@ from features.transactions.schema import CREATE_TRANSACTIONS_TABLE
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT_DIR / "data"
-DB_PATH = DATA_DIR / "budget.db"
+DB_PATH = DATA_DIR / "financli.db"
 
 
 def create_data_path() -> None:
