@@ -1,5 +1,5 @@
-import unittest
 import sqlite3
+import unittest
 
 from core.db.init import (
     DB_PATH,
