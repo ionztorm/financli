@@ -17,7 +17,7 @@ from features.banks.exceptions import (
     BankAccountWithdrawalError,
 )
 from features.transactions.model import Transactions
-from features.transactions.types import SourceAccountType, TransactionType
+from features.transactions.types import TransactionType, SourceAccountType
 
 
 class Bank(Table):
