@@ -3,7 +3,7 @@ import sqlite3
 from core.exceptions.db import QueryExecutionError
 from core.utils.helpers import wrap_error
 from features.banks.model import Bank
-from features.transactions.types import AccountType
+from features.transactions.types import SourceAccountType
 from features.transactions.exceptions import TransactionLoggingError
 
 
@@ -20,12 +20,12 @@ class TransactionService:
             source_type = transaction["source_type"]
             source_id = int(transaction["source_id"])
 
-            if source_type not in AccountType._value2member_map_:
+            if source_type not in SourceAccountType._value2member_map_:
                 raise TransactionLoggingError(
                     f"Invalid source_type: {source_type}"
                 )
 
-            if source_type == AccountType.BANK.value:
+            if source_type == SourceAccountType.BANK.value:
                 self.bank.deposit(source_id, amount)
 
             # TODO: account for other source types
@@ -34,13 +34,13 @@ class TransactionService:
             destination_id = transaction.get("destination_id")
 
             if destination_type:
-                if destination_type not in AccountType._value2member_map_:
+                if destination_type not in SourceAccountType._value2member_map_:
                     raise TransactionLoggingError(
                         f"Invalid destination_type: {destination_type}"
                     )
 
                 if (
-                    destination_type == AccountType.BANK.value
+                    destination_type == SourceAccountType.BANK.value
                     and destination_id
                 ):
                     self.bank.withdraw(int(destination_id), amount)
@@ -59,12 +59,12 @@ class TransactionService:
             source_type = transaction["source_type"]
             source_id = int(transaction["source_id"])
 
-            if source_type not in AccountType._value2member_map_:
+            if source_type not in SourceAccountType._value2member_map_:
                 raise TransactionLoggingError(
                     f"Invalid source_type: {source_type}"
                 )
 
-            if source_type == AccountType.BANK.value:
+            if source_type == SourceAccountType.BANK.value:
                 self.bank.withdraw(source_id, amount)
 
             # TODO: handle other source types
@@ -73,13 +73,13 @@ class TransactionService:
             destination_id = transaction.get("destination_id")
 
             if destination_type:
-                if destination_type not in AccountType._value2member_map_:
+                if destination_type not in SourceAccountType._value2member_map_:
                     raise TransactionLoggingError(
                         f"Invalid destination_type: {destination_type}"
                     )
 
                 if (
-                    destination_type == AccountType.BANK.value
+                    destination_type == SourceAccountType.BANK.value
                     and destination_id
                 ):
                     self.bank.deposit(int(destination_id), amount)

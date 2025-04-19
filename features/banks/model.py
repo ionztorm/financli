@@ -17,7 +17,7 @@ from features.banks.exceptions import (
     BankAccountWithdrawalError,
 )
 from features.transactions.model import Transactions
-from features.transactions.types import AccountType, TransactionType
+from features.transactions.types import SourceAccountType, TransactionType
 
 
 class Bank(Table):
@@ -82,7 +82,7 @@ class Bank(Table):
             self._update(id, {"balance": new_balance})
             self._transactions.log(
                 {
-                    "source_type": AccountType.BANK.value,
+                    "source_type": SourceAccountType.BANK.value,
                     "source_id": str(id),
                     "type": TransactionType.WITHDRAWAL.value,
                     "amount": str(amount),
@@ -111,7 +111,7 @@ class Bank(Table):
             self._update(id, {"balance": new_balance})
             self._transactions.log(
                 {
-                    "source_type": AccountType.BANK.value,
+                    "source_type": SourceAccountType.BANK.value,
                     "source_id": str(id),
                     "type": TransactionType.DEPOSIT.value,
                     "amount": str(amount),
@@ -151,10 +151,9 @@ class Bank(Table):
 
         try:
             if destination_id and destination_type:
-                # Delegate source/destination updates to TransactionService
                 self._transactions._service.apply_effect(
                     {
-                        "source_type": AccountType.BANK.value,
+                        "source_type": SourceAccountType.BANK.value,
                         "source_id": str(id),
                         "destination_type": str(destination_type),
                         "destination_id": str(destination_id),
@@ -163,13 +162,11 @@ class Bank(Table):
                     }
                 )
             else:
-                # No destination: manually update source balance only
                 new_balance = str(balance - amount)
                 self._update(id, {"balance": new_balance})
 
-            # Prepare log data (only include fields that are not None)
             log_data: dict[str, str] = {
-                "source_type": AccountType.BANK.value,
+                "source_type": SourceAccountType.BANK.value,
                 "source_id": str(id),
                 "type": TransactionType.SPEND.value,
                 "amount": str(amount),

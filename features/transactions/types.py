@@ -9,7 +9,7 @@ class TransactionType(str, Enum):
     TRANSFER = "transfer"
 
 
-class AccountType(str, Enum):
+class SourceAccountType(str, Enum):
     BANK = "bank"
     CREDIT_CARD = "credit_card"
     STORE_CARD = "store_card"
@@ -21,13 +21,16 @@ class DestinationType(str, Enum):
     STORE_CARD = "store_card"
     BILL = "bill"
     SUBSCRIPTION = "subscription"
+    LOAN = "loan"
 
 
 class TransactionCategory(str, Enum):
     GROCERIES = "groceries"
     UTILITIES = "utilities"
-    RENT = "rent"
+    HOUSING = "housing"
     ENTERTAINMENT = "entertainment"
+    HOBBIES = "hobbies"
+    GAMING = "gaming"
     TRANSPORTATION = "transportation"
     HEALTHCARE = "healthcare"
     OTHER = "other"
