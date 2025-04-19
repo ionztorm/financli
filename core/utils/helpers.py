@@ -1,5 +1,10 @@
+import json
+from pathlib import Path
 from typing import Callable, NoReturn
 from functools import wraps
+
+CONFIG_DIR = Path.home() / ".config" / "budget_cli"
+SETTINGS_PATH = CONFIG_DIR / "settings.json"
 
 
 def pretty_output(func: Callable[..., None]) -> Callable[..., None]:
@@ -24,3 +29,21 @@ def wrap_error(
         raise domain_exc(f"{prefix}: {e}") from e
 
     return wrapper
+
+
+def load_or_create_settings() -> dict:
+    if not SETTINGS_PATH.exists():
+        SETTINGS_PATH.parent.mkdir(parents=True, exist_ok=True)
+        currency = (
+            input(
+                "💱 Enter your preferred currency symbol (e.g. £, $, €): "
+            ).strip()
+            or "£"
+        )
+        settings = {"currency_symbol": currency}
+        with SETTINGS_PATH.open("w") as f:
+            json.dump(settings, f, indent=2)
+        print(f"✅ Settings saved to {SETTINGS_PATH}")
+        return settings
+    with SETTINGS_PATH.open() as f:
+        return json.load(f)
