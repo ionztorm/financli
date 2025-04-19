@@ -16,11 +16,14 @@ from features.banks.exceptions import (
     BankAccountValidationError,
     BankAccountWithdrawalError,
 )
+from features.transactions.model import Transactions
+from features.transactions.types import AccountType, TransactionType
 
 
 class Bank(Table):
     def __init__(self, connection: sqlite3.Connection) -> None:
         super().__init__(connection, TableName.BANKS)
+        self._transactions = Transactions(connection)
 
     def open(self, data: dict[str, str]) -> None:
         try:
@@ -61,7 +64,6 @@ class Bank(Table):
             overdraft = (
                 float(overdraft_str) if overdraft_str is not None else 0.0
             )
-
         except RecordNotFoundError as e:
             wrap_error(BankAccountNotFoundError, "Cannot perform transaction")(
                 e
@@ -78,17 +80,119 @@ class Bank(Table):
 
         try:
             self._update(id, {"balance": new_balance})
+            self._transactions.log(
+                {
+                    "source_type": AccountType.BANK.value,
+                    "source_id": str(id),
+                    "type": TransactionType.WITHDRAWAL.value,
+                    "amount": str(amount),
+                    "status": "completed",
+                }
+            )
         except QueryExecutionError as e:
             wrap_error(
-                BankAccountWithdrawalError, "Failed to update account balance"
+                BankAccountWithdrawalError,
+                "Failed to update balance or log transaction",
             )(e)
 
-        # TODO: log transaction
-
     def deposit(self, id: int, amount: float) -> None:
-        # TODO: Implement deposit logic
-        pass
+        try:
+            account = self.get_one(id)[0]
+            balance_str = account.get("balance")
+            balance = float(balance_str) if balance_str is not None else 0.0
+        except RecordNotFoundError as e:
+            wrap_error(BankAccountNotFoundError, "Cannot perform transaction")(
+                e
+            )
+
+        new_balance = str(balance + amount)
+
+        try:
+            self._update(id, {"balance": new_balance})
+            self._transactions.log(
+                {
+                    "source_type": AccountType.BANK.value,
+                    "source_id": str(id),
+                    "type": TransactionType.DEPOSIT.value,
+                    "amount": str(amount),
+                    "status": "completed",
+                }
+            )
+        except QueryExecutionError as e:
+            wrap_error(
+                BankAccountWithdrawalError,
+                "Failed to update balance or log transaction",
+            )(e)
 
     def spend(self, id: int, data: dict[str, str]) -> None:
-        # TODO: Implement spending logic
-        pass
+        try:
+            amount = float(data["amount"])
+            account = self.get_one(id)[0]
+            balance = float(account.get("balance") or 0.0)
+            overdraft = float(account.get("overdraft") or 0.0)
+        except (KeyError, ValueError) as e:
+            wrap_error(BankAccountValidationError, "Missing or invalid amount")(
+                e
+            )
+        except RecordNotFoundError as e:
+            wrap_error(BankAccountNotFoundError, "Cannot perform transaction")(
+                e
+            )
+
+        if balance + overdraft < amount:
+            raise BankAccountHasBalanceError(
+                f"Insufficient funds for this transaction. "
+                f"Total available: {CURRENCY_SYMBOL}{balance + overdraft} "
+                f"(including overdraft of {CURRENCY_SYMBOL}{overdraft})."
+            )
+
+        destination_type = data.get("destination_type")
+        destination_id = data.get("destination_id")
+
+        try:
+            if destination_id and destination_type:
+                # Delegate source/destination updates to TransactionService
+                self._transactions._service.apply_effect(
+                    {
+                        "source_type": AccountType.BANK.value,
+                        "source_id": str(id),
+                        "destination_type": str(destination_type),
+                        "destination_id": str(destination_id),
+                        "type": TransactionType.SPEND.value,
+                        "amount": str(amount),
+                    }
+                )
+            else:
+                # No destination: manually update source balance only
+                new_balance = str(balance - amount)
+                self._update(id, {"balance": new_balance})
+
+            # Prepare log data (only include fields that are not None)
+            log_data: dict[str, str] = {
+                "source_type": AccountType.BANK.value,
+                "source_id": str(id),
+                "type": TransactionType.SPEND.value,
+                "amount": str(amount),
+                "status": "completed",
+            }
+
+            optional_fields = [
+                "destination_type",
+                "destination_id",
+                "vendor",
+                "item",
+                "category",
+                "notes",
+            ]
+            for field in optional_fields:
+                value = data.get(field)
+                if value is not None:
+                    log_data[field] = str(value)
+
+            self._transactions.log(log_data)
+
+        except QueryExecutionError as e:
+            wrap_error(
+                BankAccountWithdrawalError,
+                "Failed to complete spend transaction",
+            )(e)
