@@ -2,7 +2,8 @@ import sqlite3
 
 from utils.types import TableName
 from utils.helpers import wrap_error
-from utils.exceptions.db import (
+
+from core.exceptions.db import (
     ValidationError,
     ColumnMismatchError,
     QueryExecutionError,
@@ -128,3 +129,8 @@ class Table:
             self._cursor.execute(query, params)
         except sqlite3.Error as e:
             wrap_error(QueryExecutionError, "Database error")(e)
+
+    def _get_balance(self, id: int) -> float:
+        record = self.get_one(id)
+        balance = record[0].get("balance")
+        return float(balance) if balance is not None else 0.0

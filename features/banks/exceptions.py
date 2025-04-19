@@ -16,3 +16,7 @@ class BankAccountDeletionError(BankError):
 
 class BankAccountValidationError(BankError):
     pass
+
+
+class BankAccountWithdrawalError(BankError):
+    pass
