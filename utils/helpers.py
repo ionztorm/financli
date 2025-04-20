@@ -24,10 +24,24 @@ def msg(message: str) -> None:
 
 
 def wrap_error(
-    domain_exc: type[Exception], prefix: str
+    domain_exc: type[Exception],
+    message: str = "",
 ) -> Callable[[Exception], NoReturn]:
-    def wrapper(e: Exception) -> NoReturn:
-        raise domain_exc(f"{prefix}: {e}") from e
+    """
+    A higher-order function to wrap and re-raise exceptions
+    with a domain-specific type and an optional message,
+    while preserving the original exception context.
+    """
+
+    def wrapper(original_exc: Exception) -> NoReturn:
+        full_message = message
+        if original_exc.args:
+            if full_message:
+                full_message += f": {original_exc}"
+            else:
+                full_message = str(original_exc)
+
+        raise domain_exc(full_message) from original_exc
 
     return wrapper
 

@@ -1,1 +1,0 @@
-CURRENCY_SYMBOL = "£"

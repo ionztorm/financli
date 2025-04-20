@@ -1,7 +1,7 @@
 import argparse
 
-from core.db.init import create_data_path
-from core.utils.helpers import load_or_create_settings
+from core.db import create_data_path
+from utils.helpers import load_or_create_settings
 
 
 def main() -> None:

@@ -2,8 +2,7 @@ import sqlite3
 
 from utils.types import TableName
 from utils.helpers import wrap_error
-
-from core.exceptions.db import (
+from core.exceptions import (
     ValidationError,
     ColumnMismatchError,
     QueryExecutionError,
@@ -39,7 +38,8 @@ class Table:
                 raise RecordNotFoundError(f"No record found with ID {id}.")
             return [self._row_to_dict(row)]
         except sqlite3.Error as e:
-            wrap_error(QueryExecutionError, "Failed to fetch record")(e)
+            wrapper = wrap_error(QueryExecutionError, "Failed to fetch record")
+            raise wrapper(e) from e
 
     def get_many(self) -> list[dict[str, str]]:
         try:
@@ -47,7 +47,8 @@ class Table:
             rows = self._cursor.fetchall()
             return [self._row_to_dict(row) for row in rows]
         except sqlite3.Error as e:
-            wrap_error(QueryExecutionError, "Failed to fetch records")(e)
+            wrapper = wrap_error(QueryExecutionError, "Failed to fetch records")
+            raise wrapper(e) from e
 
     def _create(self, data: dict[str, str]) -> None:
         self._validate_data(data)
@@ -60,8 +61,25 @@ class Table:
             f"VALUES({placeholders})"
         )
 
-        self._execute_query(query, values)
-        self._connection.commit()
+        try:
+            self._execute_query(query, values)
+            self._connection.commit()
+        except sqlite3.Error as e:
+            wrapper = wrap_error(QueryExecutionError, "Failed to create record")
+            raise wrapper(e) from e
+
+    def exists(self, id: int) -> bool:
+        try:
+            self._cursor.execute(
+                f"SELECT 1 FROM {self._table_name.value} WHERE id = ?",  # noqa: S608
+                (id,),
+            )
+            return self._cursor.fetchone() is not None
+        except sqlite3.Error as e:
+            wrapper = wrap_error(
+                QueryExecutionError, "Failed to check record existence"
+            )
+            raise wrapper(e) from e
 
     def _update(self, id: int, data: dict[str, str]) -> None:
         if not self.exists(id):
@@ -84,8 +102,12 @@ class Table:
             f"UPDATE {self._table_name.value} SET {assignments} WHERE id = ?"  # noqa: S608
         )
 
-        self._execute_query(query, (*values, id))
-        self._connection.commit()
+        try:
+            self._execute_query(query, (*values, id))
+            self._connection.commit()
+        except sqlite3.Error as e:
+            wrapper = wrap_error(QueryExecutionError, "Failed to update record")
+            raise wrapper(e) from e
 
     def _delete(self, id: int) -> None:
         if not self.exists(id):
@@ -94,8 +116,12 @@ class Table:
             )
 
         query = f"DELETE FROM {self._table_name.value} WHERE id = ?"  # noqa: S608
-        self._execute_query(query, (id,))
-        self._connection.commit()
+        try:
+            self._execute_query(query, (id,))
+            self._connection.commit()
+        except sqlite3.Error as e:
+            wrapper = wrap_error(QueryExecutionError, "Failed to delete record")
+            raise wrapper(e) from e
 
     def _row_to_dict(self, row: sqlite3.Row) -> dict[str, str]:
         column_names = [column[0] for column in self._cursor.description]
@@ -105,13 +131,6 @@ class Table:
                 f"got {len(row)}"
             )
         return dict(zip(column_names, row))
-
-    def exists(self, id: int) -> bool:
-        self._cursor.execute(
-            f"SELECT 1 FROM {self._table_name.value} WHERE id = ?",  # noqa: S608
-            (id,),
-        )
-        return self._cursor.fetchone() is not None
 
     def _validate_data(self, data: dict[str, str]) -> None:
         missing_fields = [
@@ -128,7 +147,8 @@ class Table:
         try:
             self._cursor.execute(query, params)
         except sqlite3.Error as e:
-            wrap_error(QueryExecutionError, "Database error")(e)
+            wrapper = wrap_error(QueryExecutionError, "Database error")
+            raise wrapper(e) from e
 
     def _get_balance(self, id: int) -> float:
         record = self.get_one(id)
