@@ -17,18 +17,12 @@ class TestTable(unittest.TestCase):
 
     def setUp(self) -> None:
         """Set up a temporary SQLite database and table for testing."""
-        self.connection = sqlite3.connect(
-            "test.db"
-        )  # Creating a temporary database
+        self.connection = sqlite3.connect("test.db")
         self.cursor = self.connection.cursor()
 
-        # Drop the table if it already exists to avoid the "table already exists" error
-        self.cursor.execute(
-            "DROP TABLE IF EXISTS banks"
-        )  # Adjusted table name based on TableName enum
+        self.cursor.execute("DROP TABLE IF EXISTS banks")
         self.connection.commit()
 
-        # Creating a sample table
         self.cursor.execute(
             """
             CREATE TABLE banks (
@@ -40,15 +34,11 @@ class TestTable(unittest.TestCase):
         )
         self.connection.commit()
 
-        # Initialize Table instance with the correct TableName enum member
         self.table = Table(self.connection, TableName.BANKS)
 
     def tearDown(self) -> None:
         """Clean up after each test."""
-        # Drop the table and close the connection
-        self.cursor.execute(
-            "DROP TABLE banks"
-        )  # Adjusted table name based on TableName enum
+        self.cursor.execute("DROP TABLE banks")
         self.connection.commit()
         self.connection.close()
 
@@ -68,7 +58,7 @@ class TestTable(unittest.TestCase):
     def test_get_one_not_found(self) -> None:
         """Test fetching one record when the ID doesn't exist."""
         with self.assertRaises(RecordNotFoundError):
-            self.table.get_one(999)  # Non-existent ID
+            self.table.get_one(999)
 
     def test_get_many(self) -> None:
         """Test fetching all records."""
@@ -99,7 +89,7 @@ class TestTable(unittest.TestCase):
         """Test inserting an invalid record (missing required field)."""
         data: dict[str, str] = {"name": "John Doe"}
         with self.assertRaises(ValidationError):
-            self.table._create(data)  # Missing 'balance'
+            self.table._create(data)
 
     def test_update_valid(self) -> None:
         """Test updating an existing record."""
@@ -121,7 +111,7 @@ class TestTable(unittest.TestCase):
         """Test updating a non-existent record."""
         data: dict[str, str] = {"name": "John Doe", "balance": "100.0"}
         with self.assertRaises(RecordNotFoundError):
-            self.table._update(999, data)  # Non-existent ID
+            self.table._update(999, data)
 
     def test_update_no_changes(self) -> None:
         """Test updating with no changes (valid fields only)."""
@@ -132,7 +122,7 @@ class TestTable(unittest.TestCase):
         self.connection.commit()
 
         data: dict[str, str] = {"name": "John Doe", "balance": "100.0"}
-        self.table._update(1, data)  # No change, but should not raise an error
+        self.table._update(1, data)
 
         result: list[dict[str, str]] = self.table.get_one(1)
         self.assertEqual(
@@ -150,25 +140,18 @@ class TestTable(unittest.TestCase):
         self.table._delete(1)
 
         with self.assertRaises(RecordNotFoundError):
-            self.table.get_one(
-                1
-            )  # Should raise error because record is deleted
+            self.table.get_one(1)
 
     def test_delete_not_found(self) -> None:
         """Test deleting a non-existent record."""
         with self.assertRaises(RecordNotFoundError):
-            self.table._delete(999)  # Non-existent ID
+            self.table._delete(999)
 
     def test_column_mismatch(self) -> None:
         """Test column mismatch error when converting row to dict."""
-        # Simulating a column mismatch by manually modifying row length
-        row = sqlite3.Row(
-            self.cursor, ("id", "name", "balance")
-        )  # Use a tuple instead of a list
+        row = sqlite3.Row(self.cursor, ("id", "name", "balance"))
         with self.assertRaises(ColumnMismatchError):
-            self.table._row_to_dict(
-                row
-            )  # This should raise ColumnMismatchError
+            self.table._row_to_dict(row)
 
 
 if __name__ == "__main__":
