@@ -1,7 +1,7 @@
 import sqlite3
 import unittest
 
-from core.controller import Controller
+from core.controller import Controller, TransactionError
 from core.exceptions import RecordNotFoundError
 from features.bank.schema import CREATE_BANKS_TABLE
 from features.bank.exceptions import (
@@ -123,6 +123,141 @@ class TestController(unittest.TestCase):
             self.controller.withdraw(
                 {"account_type": "bank", "id": 999, "amount": 20.0}
             )
+
+    # NOTE: New tests
+
+    def test_transaction_valid(self) -> None:
+        # Setup source
+        self.cursor.execute(
+            "INSERT INTO banks (provider, alias, balance, overdraft) VALUES (?, ?, ?, ?)",
+            ("BankX", "Source", 300.0, 0.0),
+        )
+        # Setup destination
+        self.cursor.execute(
+            "INSERT INTO banks (provider, alias, balance, overdraft) VALUES (?, ?, ?, ?)",
+            ("BankX", "Destination", 100.0, 0.0),
+        )
+        self.connection.commit()
+
+        self.controller.transaction(
+            {
+                "source_account_type": "bank",
+                "source_id": 1,
+                "destination_account_type": "bank",
+                "destination_id": 2,
+                "amount": 50.0,
+            }
+        )
+
+        source = self.controller.bank_model.get_one(1)
+        dest = self.controller.bank_model.get_one(2)
+        self.assertEqual(source[0]["balance"], 250.0)
+        self.assertEqual(dest[0]["balance"], 150.0)
+
+    # def test_transaction_invalid_source_account(self) -> None:
+    #     with self.assertRaises(BankAccountNotFoundError):
+    #         self.controller.transaction(
+    #             {
+    #                 "source_account_type": "bank",
+    #                 "source_id": 999,
+    #                 "destination_account_type": "bank",
+    #                 "destination_id": 1,
+    #                 "amount": 20.0,
+    #             }
+    #         )
+
+    def test_transaction_invalid_source_account(self) -> None:
+        with self.assertRaises(TransactionError) as context:
+            self.controller.transaction(
+                {
+                    "source_account_type": "bank",
+                    "source_id": 999,
+                    "destination_account_type": "bank",
+                    "destination_id": 1,
+                    "amount": 20.0,
+                }
+            )
+        self.assertIn("No record found with ID 999", str(context.exception))
+
+    def test_deposit_with_string_id_and_amount(self) -> None:
+        self.cursor.execute(
+            "INSERT INTO banks (provider, alias, balance, overdraft) VALUES (?, ?, ?, ?)",
+            ("BankX", "Main", 100.0, 0.0),
+        )
+        self.connection.commit()
+
+        self.controller.deposit(
+            {"account_type": "bank", "id": "1", "amount": "50.0"}
+        )
+        result = self.controller.bank_model.get_one(1)
+        self.assertEqual(result[0]["balance"], 150.0)
+
+    def test_withdraw_with_string_id_and_amount(self) -> None:
+        self.cursor.execute(
+            "INSERT INTO banks (provider, alias, balance, overdraft) VALUES (?, ?, ?, ?)",
+            ("BankX", "Main", 200.0, 0.0),
+        )
+        self.connection.commit()
+
+        self.controller.withdraw(
+            {"account_type": "bank", "id": "1", "amount": "75.0"}
+        )
+        result = self.controller.bank_model.get_one(1)
+        self.assertEqual(result[0]["balance"], 125.0)
+
+    def test_validate_account_type_missing(self) -> None:
+        with self.assertRaises(ValueError):
+            self.controller.open(
+                {
+                    # missing "account_type"
+                    "provider": "BankX",
+                    "balance": "100.0",
+                }
+            )
+
+    def test_validate_id_invalid_string(self) -> None:
+        with self.assertRaises(ValueError):
+            self.controller.deposit(
+                {"account_type": "bank", "id": "abc", "amount": 50.0}
+            )
+
+    def test_validate_amount_invalid_type(self) -> None:
+        self.cursor.execute(
+            "INSERT INTO banks (provider, alias, balance, overdraft) VALUES (?, ?, ?, ?)",
+            ("BankX", "Main", 200.0, 0.0),
+        )
+        self.connection.commit()
+
+        with self.assertRaises(ValueError):
+            self.controller.deposit(
+                {
+                    "account_type": "bank",
+                    "id": 1,
+                    "amount": [123],  # invalid type
+                }
+            )
+
+    def test_deposit_unsupported_account_type(self) -> None:
+        with self.assertRaises(ValueError) as context:
+            self.controller.deposit(
+                {
+                    "account_type": "store_card",  # not implemented yet
+                    "id": 1,
+                    "amount": 50.0,
+                }
+            )
+        self.assertIn("Unsupported account type", str(context.exception))
+
+    def test_withdraw_unsupported_account_type(self) -> None:
+        with self.assertRaises(ValueError) as context:
+            self.controller.withdraw(
+                {
+                    "account_type": "loan",  # not implemented yet
+                    "id": 1,
+                    "amount": 50.0,
+                }
+            )
+        self.assertIn("Unsupported account type", str(context.exception))
 
 
 if __name__ == "__main__":
