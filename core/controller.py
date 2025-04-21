@@ -1,14 +1,12 @@
 import sqlite3
 
-from typing import Callable
-
 from utils.types import TableName
 from utils.helpers import wrap_error
 from utils.constants import TYPE_CONFIG
+from utils.model_types import ModelType
 from features.accounts.bank.model import Bank
 
 
-# TODO: Create transaction domain errors
 class TransactionError(Exception):
     pass
 
@@ -22,6 +20,10 @@ class Controller:
         self.valid_account_types = self._get_valid_account_types()
         self.source_types = self.valid_account_types["source_types"]
         self.destination_types = self.valid_account_types["dest_types"]
+
+        self._model_map: dict[str, ModelType] = {
+            TYPE_CONFIG[TableName.BANKS]["display_name"]: self.bank_model,
+        }
 
     def _get_valid_account_types(self) -> dict:
         source_types = []
@@ -41,40 +43,37 @@ class Controller:
             raise ValueError(f"{field_name} must be a non-empty string.")
         return value
 
-    def _get_open_method(self, account_type: str) -> Callable | None:
-        if account_type == TYPE_CONFIG[TableName.BANKS]["display_name"]:
-            return self.bank_model.open
-        # TODO: Implement for credit card
-        # TODO: Implement for store card
-        # TODO: Implement for subscriptions
-        # TODO: Implement for bills
-        # TODO: Implement for loans
-        return None
+    def _get_model(self, account_type: str) -> ModelType:
+        model = self._model_map.get(account_type)
+        if not model:
+            raise ValueError(f"No model found for account type: {account_type}")
+        return model
+
+    def _get_source_model(self, account_type: str) -> ModelType:
+        if account_type not in self.source_types:
+            raise ValueError(f"Unsupported source account type: {account_type}")
+        return self._get_model(account_type)
+
+    def _get_destination_model(self, account_type: str) -> ModelType:
+        if account_type not in self.destination_types:
+            raise ValueError(
+                f"Unsupported destination account type: {account_type}"
+            )
+        return self._get_model(account_type)
+
+    def list(self, data: dict) -> list[dict]:
+        account_type = self._get_account_type(data)
+        model = self._get_model(account_type)
+
+        if "id" in data:
+            id_ = self._get_id(data)
+            return model.get_one(id_)
+        return model.get_many()
 
     def open(self, data: dict) -> None:
-        account_type = self._require_non_empty_str(
-            data.get("account_type"), "Account type"
-        )
-
-        open_method = self._get_open_method(account_type)
-        if open_method:
-            open_method(data)
-        else:
-            valid_types = self.source_types + self.destination_types
-            raise ValueError(
-                f"Unsupported account type '{account_type}' for open. "
-                f"Supported types: {', '.join(valid_types)}"
-            )
-
-    def _get_close_method(self, account_type: str) -> Callable | None:
-        if account_type == TYPE_CONFIG[TableName.BANKS]["display_name"]:
-            return self.bank_model.close
-        # TODO: Implement for credit card
-        # TODO: Implement for store card
-        # TODO: Implement for subscriptions
-        # TODO: Implement for bills
-        # TODO: Implement for loans
-        return None
+        account_type = self._get_account_type(data)
+        model = self._get_model(account_type)
+        model.open(data)
 
     def close(self, account_type: str, id: int) -> None:
         account_type = self._require_non_empty_str(account_type, "Account type")
@@ -84,62 +83,22 @@ class Controller:
                 "Account ID must be an integer and cannot be empty."
             )
 
-        close_method = self._get_close_method(account_type)
-        if close_method:
-            close_method(id)
-        else:
-            valid_types = self.source_types + self.destination_types
-            raise ValueError(
-                f"Unsupported account type '{account_type}' for close. "
-                f"Supported types: {', '.join(valid_types)}"
-            )
-
-    def _get_deposit_method(self, account_type: str) -> Callable | None:
-        if account_type == TYPE_CONFIG[TableName.BANKS]["display_name"]:
-            return self.bank_model.deposit
-        # TODO: Implement for credit card
-        # TODO: Implement for store card
-        # TODO: Implement for subscriptions
-        # TODO: Implement for bills
-        # TODO: Implement for loans
-        return None
+        model = self._get_model(account_type)
+        model.close(id)
 
     def deposit(self, data: dict) -> None:
-        account_type, account_id = self._validate_account_type_and_id(data)
-        amount = self._validate_amount(data)
+        account_type, account_id = self._get_account_type_and_id(data)
+        amount = self._get_amount(data)
 
-        deposit_method = self._get_deposit_method(account_type)
-        if deposit_method:
-            deposit_method(account_id, amount)
-        else:
-            raise ValueError(
-                f"Unsupported account type '{account_type}' for deposit. "
-                "Supported destination types: "
-                f"{', '.join(self.destination_types)}"
-            )
-
-    def _get_withdraw_method(self, account_type: str) -> Callable | None:
-        if account_type == TYPE_CONFIG[TableName.BANKS]["display_name"]:
-            return self.bank_model.withdraw
-        # TODO: Implement for credit card
-        # TODO: Implement for store card
-        # TODO: Implement for subscriptions
-        # TODO: Implement for bills
-        # TODO: Implement for loans
-        return None
+        model = self._get_destination_model(account_type)
+        model.deposit(account_id, amount)
 
     def withdraw(self, data: dict) -> None:
-        account_type, account_id = self._validate_account_type_and_id(data)
-        amount = self._validate_amount(data)
+        account_type, account_id = self._get_account_type_and_id(data)
+        amount = self._get_amount(data)
 
-        withdraw_method = self._get_withdraw_method(account_type)
-        if withdraw_method:
-            withdraw_method(account_id, amount)
-        else:
-            raise ValueError(
-                f"Unsupported account type '{account_type}' for withdrawal. "
-                f"Supported source types: {', '.join(self.source_types)}"
-            )
+        model = self._get_source_model(account_type)
+        model.withdraw(account_id, amount)
 
     def transaction(self, data: dict) -> None:
         try:
@@ -167,30 +126,32 @@ class Controller:
     def _log_transaction(self, data: dict) -> None:
         pass  # TODO: Implement transaction logging
 
-    def _validate_account_type_and_id(self, data: dict) -> tuple[str, int]:
-        account_type = self._require_non_empty_str(
-            data.get("account_type"), "Account type"
-        )
+    def _get_account_type_and_id(self, data: dict) -> tuple[str, int]:
+        account_type = self._get_account_type(data)
+        account_id = self._get_id(data)
+        return account_type, account_id
 
-        account_id_raw = data.get("id")
-        if account_id_raw is None:
-            raise ValueError("Account ID is required.")
-
+    def _get_amount(self, data: dict) -> float:
+        amount_raw = data.get("amount")
+        if amount_raw is None:
+            raise ValueError("Amount is required.")
         try:
-            account_id = int(account_id_raw)
+            return float(amount_raw)
+        except (ValueError, TypeError) as e:
+            raise ValueError("Amount must be convertible to a float.") from e
+
+    def _get_id(self, data: dict) -> int:
+        raw_id = data.get("id")
+        if raw_id is None:
+            raise ValueError("Account ID is required.")
+        try:
+            return int(raw_id)
         except (ValueError, TypeError) as e:
             raise ValueError(
                 "Account ID must be convertible to an integer."
             ) from e
 
-        return account_type, account_id
-
-    def _validate_amount(self, data: dict) -> float:
-        amount_raw = data.get("amount")
-        if amount_raw is None:
-            raise ValueError("Amount is required.")
-
-        try:
-            return float(amount_raw)
-        except (ValueError, TypeError) as e:
-            raise ValueError("Amount must be convertible to a float.") from e
+    def _get_account_type(self, data: dict) -> str:
+        return self._require_non_empty_str(
+            data.get("account_type"), "Account type"
+        )
