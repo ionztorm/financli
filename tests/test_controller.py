@@ -3,11 +3,12 @@ import unittest
 
 from core.controller import Controller, TransactionError
 from core.exceptions import RecordNotFoundError
-from features.bank.schema import CREATE_BANKS_TABLE
-from features.bank.exceptions import (
-    BankAccountNotFoundError,
-    BankAccountHasBalanceError,
-    BankAccountValidationError,
+from features.accounts.bank.schema import CREATE_BANKS_TABLE
+from features.accounts.bank.exceptions import (
+    BankAccountOpenError,
+    BankAccountCloseError,
+    BankAccountDepositError,
+    BankAccountWithdrawalError,
 )
 
 
@@ -45,7 +46,7 @@ class TestController(unittest.TestCase):
             "provider": "BankX",
             "balance": "200.0",
         }
-        with self.assertRaises(BankAccountValidationError):
+        with self.assertRaises(BankAccountOpenError):
             self.controller.open(data)
 
     def test_open_unsupported_account_type(self) -> None:
@@ -71,7 +72,7 @@ class TestController(unittest.TestCase):
             self.controller.bank_model.get_one(1)
 
     def test_close_nonexistent_account(self) -> None:
-        with self.assertRaises(BankAccountNotFoundError):
+        with self.assertRaises(BankAccountCloseError):
             self.controller.close("bank", 999)
 
     def test_deposit_valid(self) -> None:
@@ -88,7 +89,7 @@ class TestController(unittest.TestCase):
         self.assertEqual(result[0]["balance"], 250.0)
 
     def test_deposit_nonexistent_account(self) -> None:
-        with self.assertRaises(BankAccountNotFoundError):
+        with self.assertRaises(BankAccountDepositError):
             self.controller.deposit(
                 {"account_type": "bank", "id": 999, "amount": 50.0}
             )
@@ -113,27 +114,25 @@ class TestController(unittest.TestCase):
             ("BankX", "Main", 50.0, 10.0),
         )
         self.connection.commit()
-        with self.assertRaises(BankAccountHasBalanceError):
+        with self.assertRaises(BankAccountWithdrawalError) as context:
             self.controller.withdraw(
                 {"account_type": "bank", "id": 1, "amount": 100.0}
             )
+        self.assertIn("Unable to complete withdrawal", str(context.exception))
+        self.assertIn("Insufficient funds", str(context.exception))
 
     def test_withdraw_nonexistent_account(self) -> None:
-        with self.assertRaises(BankAccountNotFoundError):
+        with self.assertRaises(BankAccountWithdrawalError):
             self.controller.withdraw(
                 {"account_type": "bank", "id": 999, "amount": 20.0}
             )
 
-    # NOTE: New tests
-
     def test_transaction_valid(self) -> None:
-        # Setup source
         self.cursor.execute(
             "INSERT INTO banks (provider, alias, balance, overdraft) "
             "VALUES (?, ?, ?, ?)",
             ("BankX", "Source", 300.0, 0.0),
         )
-        # Setup destination
         self.cursor.execute(
             "INSERT INTO banks (provider, alias, balance, overdraft) "
             "VALUES (?, ?, ?, ?)",
@@ -201,7 +200,6 @@ class TestController(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.controller.open(
                 {
-                    # missing "account_type"
                     "provider": "BankX",
                     "balance": "100.0",
                 }
@@ -226,7 +224,7 @@ class TestController(unittest.TestCase):
                 {
                     "account_type": "bank",
                     "id": 1,
-                    "amount": [123],  # invalid type
+                    "amount": [123],
                 }
             )
 
@@ -234,7 +232,7 @@ class TestController(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             self.controller.deposit(
                 {
-                    "account_type": "store_card",  # not implemented yet
+                    "account_type": "store_card",
                     "id": 1,
                     "amount": 50.0,
                 }
@@ -245,7 +243,7 @@ class TestController(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             self.controller.withdraw(
                 {
-                    "account_type": "loan",  # not implemented yet
+                    "account_type": "loan",
                     "id": 1,
                     "amount": 50.0,
                 }

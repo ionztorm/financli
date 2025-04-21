@@ -2,7 +2,7 @@ import sqlite3
 
 from pathlib import Path
 
-from features.bank.schema import CREATE_BANKS_TABLE
+from features.accounts.bank.schema import CREATE_BANKS_TABLE
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT_DIR / "data"

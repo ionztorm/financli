@@ -5,7 +5,7 @@ from typing import Callable
 from utils.types import TableName
 from utils.helpers import wrap_error
 from utils.constants import TYPE_CONFIG
-from features.bank.model import Bank
+from features.accounts.bank.model import Bank
 
 
 # TODO: Create transaction domain errors
@@ -162,7 +162,7 @@ class Controller:
 
             self._log_transaction(data)
         except Exception as e:
-            wrap_error(TransactionError, "Transaction failed")(e)
+            raise wrap_error(TransactionError, "Transaction failed")(e) from e
 
     def _log_transaction(self, data: dict) -> None:
         pass  # TODO: Implement transaction logging
