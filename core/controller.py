@@ -171,13 +171,14 @@ class Controller:
         account_type = self._require_non_empty_str(
             data.get("account_type"), "Account type"
         )
-        account_id_str = self._require_non_empty_str(
-            data.get("id"), "Account ID"
-        )
+
+        account_id_raw = data.get("id")
+        if account_id_raw is None:
+            raise ValueError("Account ID is required.")
 
         try:
-            account_id = int(account_id_str)
-        except ValueError as e:
+            account_id = int(account_id_raw)
+        except (ValueError, TypeError) as e:
             raise ValueError(
                 "Account ID must be convertible to an integer."
             ) from e
@@ -185,9 +186,11 @@ class Controller:
         return account_type, account_id
 
     def _validate_amount(self, data: dict) -> float:
-        amount_str = self._require_non_empty_str(data.get("amount"), "Amount")
+        amount_raw = data.get("amount")
+        if amount_raw is None:
+            raise ValueError("Amount is required.")
 
         try:
-            return float(amount_str)
-        except ValueError as e:
+            return float(amount_raw)
+        except (ValueError, TypeError) as e:
             raise ValueError("Amount must be convertible to a float.") from e
