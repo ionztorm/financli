@@ -9,9 +9,9 @@ def main() -> None:
     load_or_create_settings()
 
     parser = argparse.ArgumentParser(
-        prog="budget",
+        prog="fcli",
         description=(
-            "💸 Budget CLI - Manage your personal finances from the terminal."
+            "💸 FinanCLI - Manage your personal finances from the terminal."
         ),
     )
 
