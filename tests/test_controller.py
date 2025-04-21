@@ -57,7 +57,7 @@ class TestController(unittest.TestCase):
         }
         with self.assertRaises(ValueError) as context:
             self.controller.open(data)
-        self.assertIn("Unsupported account type", str(context.exception))
+        self.assertIn("No model found for account type", str(context.exception))
 
     def test_close_valid_account(self) -> None:
         self.cursor.execute(
@@ -237,7 +237,9 @@ class TestController(unittest.TestCase):
                     "amount": 50.0,
                 }
             )
-        self.assertIn("Unsupported account type", str(context.exception))
+        self.assertIn(
+            "Unsupported destination account type", str(context.exception)
+        )
 
     def test_withdraw_unsupported_account_type(self) -> None:
         with self.assertRaises(ValueError) as context:
@@ -248,7 +250,51 @@ class TestController(unittest.TestCase):
                     "amount": 50.0,
                 }
             )
-        self.assertIn("Unsupported account type", str(context.exception))
+        self.assertIn("Unsupported source account type", str(context.exception))
+
+    def test_list_many_accounts(self) -> None:
+        self.cursor.execute(
+            "INSERT INTO banks (provider, alias, balance, overdraft) "
+            "VALUES (?, ?, ?, ?)",
+            ("BankX", "Main", 100.0, 0.0),
+        )
+        self.cursor.execute(
+            "INSERT INTO banks (provider, alias, balance, overdraft) "
+            "VALUES (?, ?, ?, ?)",
+            ("BankY", "Spare", 200.0, 50.0),
+        )
+        self.connection.commit()
+
+        result = self.controller.list({"account_type": "bank"})
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result[0]["provider"], "BankX")
+        self.assertEqual(result[1]["provider"], "BankY")
+
+    def test_list_one_account_by_id(self) -> None:
+        self.cursor.execute(
+            "INSERT INTO banks (provider, alias, balance, overdraft) "
+            "VALUES (?, ?, ?, ?)",
+            ("BankX", "Main", 100.0, 0.0),
+        )
+        self.connection.commit()
+
+        result = self.controller.list({"account_type": "bank", "id": 1})
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["provider"], "BankX")
+
+    def test_list_invalid_account_type(self) -> None:
+        with self.assertRaises(ValueError) as context:
+            self.controller.list({"account_type": "alien_card"})
+        self.assertIn("No model found for account type", str(context.exception))
+
+    def test_list_invalid_id_type(self) -> None:
+        with self.assertRaises(ValueError) as context:
+            self.controller.list({"account_type": "bank", "id": "abc"})
+        self.assertIn("Account ID must be convertible", str(context.exception))
+
+    def test_list_missing_account(self) -> None:
+        with self.assertRaises(RecordNotFoundError):
+            self.controller.list({"account_type": "bank", "id": 999})
 
 
 if __name__ == "__main__":
