@@ -8,30 +8,32 @@ from core.exceptions import (
     QueryExecutionError,
     RecordNotFoundError,
 )
-from features.bank.exceptions import (
-    BankAccountDeletionError,
-    BankAccountNotFoundError,
-    BankAccountHasBalanceError,
-    BankAccountValidationError,
-    BankAccountWithdrawalError,
+from features.accounts.exceptions import (
+    AccountDeletionError,
+    AccountNotFoundError,
+    AccountHasBalanceError,
+    AccountValidationError,
+    AccountWithdrawalError,
 )
 
 
-class Bank(Table):
-    def __init__(self, connection: sqlite3.Connection) -> None:
-        super().__init__(connection, TableName.BANKS)
+class Accounts(Table):
+    def __init__(
+        self, connection: sqlite3.Connection, table_name: TableName
+    ) -> None:
+        super().__init__(connection, table_name)
 
     def open(self, data: dict[str, str]) -> None:
         try:
             self._create(data)
         except ValidationError as e:
             wrapper = wrap_error(
-                BankAccountValidationError, "Could not open account"
+                AccountValidationError, "Could not open account"
             )
             raise wrapper(e) from e
         except QueryExecutionError as e:
             wrapper = wrap_error(
-                BankAccountValidationError, "Account creation failed"
+                AccountValidationError, "Account creation failed"
             )
             raise wrapper(e) from e
 
@@ -39,21 +41,19 @@ class Bank(Table):
         try:
             self.get_one(id)
         except RecordNotFoundError as e:
-            wrapper = wrap_error(
-                BankAccountNotFoundError, "Cannot close account"
-            )
+            wrapper = wrap_error(AccountNotFoundError, "Cannot close account")
             raise wrapper(e) from e
 
         try:
             self._delete(id)
         except RecordNotFoundError as e:
             wrapper = wrap_error(
-                BankAccountNotFoundError, "Account missing during deletion"
+                AccountNotFoundError, "Account missing during deletion"
             )
             raise wrapper(e) from e
         except QueryExecutionError as e:
             wrapper = wrap_error(
-                BankAccountDeletionError, "Could not delete account"
+                AccountDeletionError, "Could not delete account"
             )
             raise wrapper(e) from e
 
@@ -69,12 +69,12 @@ class Bank(Table):
             )
         except RecordNotFoundError as e:
             wrapper = wrap_error(
-                BankAccountNotFoundError, "Cannot perform transaction"
+                AccountNotFoundError, "Cannot perform transaction"
             )
             raise wrapper(e) from e
 
         if balance + overdraft < amount:
-            raise BankAccountHasBalanceError(
+            raise AccountHasBalanceError(
                 "Insufficient funds for this transaction."
             )
 
@@ -84,8 +84,8 @@ class Bank(Table):
             self._update(id, {"balance": new_balance})
         except QueryExecutionError as e:
             wrapper = wrap_error(
-                BankAccountWithdrawalError,
-                "Failed to update balance or log transaction",
+                AccountWithdrawalError,
+                "Failed to update balance.",
             )
             raise wrapper(e) from e
 
@@ -96,7 +96,7 @@ class Bank(Table):
             balance = float(balance_str) if balance_str is not None else 0.0
         except RecordNotFoundError as e:
             wrapper = wrap_error(
-                BankAccountNotFoundError, "Cannot perform transaction"
+                AccountNotFoundError, "Cannot perform transaction"
             )
             raise wrapper(e) from e
 
@@ -106,7 +106,7 @@ class Bank(Table):
             self._update(id, {"balance": new_balance})
         except QueryExecutionError as e:
             wrapper = wrap_error(
-                BankAccountWithdrawalError,
+                AccountWithdrawalError,
                 "Failed to update balance or log transaction",
             )
             raise wrapper(e) from e
