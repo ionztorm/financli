@@ -129,12 +129,14 @@ class TestController(unittest.TestCase):
     def test_transaction_valid(self) -> None:
         # Setup source
         self.cursor.execute(
-            "INSERT INTO banks (provider, alias, balance, overdraft) VALUES (?, ?, ?, ?)",
+            "INSERT INTO banks (provider, alias, balance, overdraft) "
+            "VALUES (?, ?, ?, ?)",
             ("BankX", "Source", 300.0, 0.0),
         )
         # Setup destination
         self.cursor.execute(
-            "INSERT INTO banks (provider, alias, balance, overdraft) VALUES (?, ?, ?, ?)",
+            "INSERT INTO banks (provider, alias, balance, overdraft) "
+            "VALUES (?, ?, ?, ?)",
             ("BankX", "Destination", 100.0, 0.0),
         )
         self.connection.commit()
@@ -154,18 +156,6 @@ class TestController(unittest.TestCase):
         self.assertEqual(source[0]["balance"], 250.0)
         self.assertEqual(dest[0]["balance"], 150.0)
 
-    # def test_transaction_invalid_source_account(self) -> None:
-    #     with self.assertRaises(BankAccountNotFoundError):
-    #         self.controller.transaction(
-    #             {
-    #                 "source_account_type": "bank",
-    #                 "source_id": 999,
-    #                 "destination_account_type": "bank",
-    #                 "destination_id": 1,
-    #                 "amount": 20.0,
-    #             }
-    #         )
-
     def test_transaction_invalid_source_account(self) -> None:
         with self.assertRaises(TransactionError) as context:
             self.controller.transaction(
@@ -181,7 +171,8 @@ class TestController(unittest.TestCase):
 
     def test_deposit_with_string_id_and_amount(self) -> None:
         self.cursor.execute(
-            "INSERT INTO banks (provider, alias, balance, overdraft) VALUES (?, ?, ?, ?)",
+            "INSERT INTO banks (provider, alias, balance, overdraft) "
+            "VALUES (?, ?, ?, ?)",
             ("BankX", "Main", 100.0, 0.0),
         )
         self.connection.commit()
@@ -194,7 +185,8 @@ class TestController(unittest.TestCase):
 
     def test_withdraw_with_string_id_and_amount(self) -> None:
         self.cursor.execute(
-            "INSERT INTO banks (provider, alias, balance, overdraft) VALUES (?, ?, ?, ?)",
+            "INSERT INTO banks (provider, alias, balance, overdraft) "
+            "VALUES (?, ?, ?, ?)",
             ("BankX", "Main", 200.0, 0.0),
         )
         self.connection.commit()
@@ -223,7 +215,8 @@ class TestController(unittest.TestCase):
 
     def test_validate_amount_invalid_type(self) -> None:
         self.cursor.execute(
-            "INSERT INTO banks (provider, alias, balance, overdraft) VALUES (?, ?, ?, ?)",
+            "INSERT INTO banks (provider, alias, balance, overdraft) "
+            "VALUES (?, ?, ?, ?)",
             ("BankX", "Main", 200.0, 0.0),
         )
         self.connection.commit()
