@@ -1,7 +1,7 @@
 import sqlite3
 
 from utils.types import TableName
-from utils.helpers import wrap_error  # Assuming wrap_error is available
+from utils.helpers import wrap_error
 from core.base_model import Table
 from core.exceptions import (
     ValidationError,
