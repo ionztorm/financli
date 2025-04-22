@@ -1,5 +1,7 @@
 import sqlite3
 
+from features.accounts.credit_card.model import CreditCard
+from features.accounts.store_card.model import StoreCard
 from utils.types import TableName
 from utils.helpers import wrap_error
 from utils.constants import TYPE_CONFIG
@@ -16,6 +18,8 @@ class Controller:
         self.db_connection = db_connection
         self._cursor = db_connection.cursor()
         self.bank_model = Bank(db_connection)
+        self.credit_card_model = CreditCard(db_connection)
+        self.store_card_model = StoreCard(db_connection)
 
         self.valid_account_types = self._get_valid_account_types()
         self.source_types = self.valid_account_types["source_types"]
@@ -23,6 +27,12 @@ class Controller:
 
         self._model_map: dict[str, ModelType] = {
             TYPE_CONFIG[TableName.BANKS]["display_name"]: self.bank_model,
+            TYPE_CONFIG[TableName.CREDITCARDS][
+                "display_name"
+            ]: self.credit_card_model,
+            TYPE_CONFIG[TableName.STORECARDS][
+                "display_name"
+            ]: self.store_card_model,
         }
 
     def _get_valid_account_types(self) -> dict:
