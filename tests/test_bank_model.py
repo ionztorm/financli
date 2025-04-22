@@ -78,8 +78,7 @@ class TestBank(unittest.TestCase):
     def test_withdraw_valid(self) -> None:
         self.cursor.execute(
             "INSERT INTO banks (provider, alias, balance, overdraft, "
-            "is_source, is_destination) "
-            "VALUES (?, ?, ?, ?, ?, ?)",
+            "is_source, is_destination) VALUES (?, ?, ?, ?, ?, ?)",
             ("BankA", "Savings", 100.0, 50.0, 1, 1),
         )
         self.connection.commit()
@@ -117,15 +116,14 @@ class TestBank(unittest.TestCase):
             self.bank.withdraw(1, 200.0)
         self.assertEqual(
             str(context.exception),
-            "Unable to complete withdrawal: Insufficient funds for this "
-            "transaction.",
+            "Unable to complete withdrawal: Insufficient funds for "
+            "this transaction.",
         )
 
     def test_deposit_valid(self) -> None:
         self.cursor.execute(
             "INSERT INTO banks (provider, alias, balance, overdraft, "
-            "is_source, is_destination) "
-            "VALUES (?, ?, ?, ?, ?, ?)",
+            "is_source, is_destination) VALUES (?, ?, ?, ?, ?, ?)",
             ("BankA", "Savings", 100.0, 50.0, 1, 1),
         )
         self.connection.commit()
