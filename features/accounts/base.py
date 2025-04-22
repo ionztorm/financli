@@ -11,7 +11,6 @@ from core.exceptions import (
 from features.accounts.exceptions import (
     AccountDeletionError,
     AccountNotFoundError,
-    AccountHasBalanceError,
     AccountValidationError,
     AccountWithdrawalError,
 )
@@ -60,23 +59,12 @@ class Accounts(Table):
     def withdraw(self, id: int, amount: float) -> None:
         try:
             account = self.get_one(id)[0]
-            balance_str = account.get("balance")
-            overdraft_str = account.get("overdraft")
-
-            balance = float(balance_str) if balance_str is not None else 0.0
-            overdraft = (
-                float(overdraft_str) if overdraft_str is not None else 0.0
-            )
+            balance = float(account.get("balance", 0.0))
         except RecordNotFoundError as e:
             wrapper = wrap_error(
                 AccountNotFoundError, "Cannot perform transaction"
             )
             raise wrapper(e) from e
-
-        if balance + overdraft < amount:
-            raise AccountHasBalanceError(
-                "Insufficient funds for this transaction."
-            )
 
         new_balance = str(balance - amount)
 
