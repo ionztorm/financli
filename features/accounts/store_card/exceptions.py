@@ -1,18 +1,18 @@
-class CreditCardError(Exception):
+class StoreCardError(Exception):
     """Base exception for credit card-related operations."""
 
 
-class CreditCardAccountOpenError(CreditCardError):
+class StoreCardAccountOpenError(StoreCardError):
     pass
 
 
-class CreditCardAccountCloseError(CreditCardError):
+class StoreCardAccountCloseError(StoreCardError):
     pass
 
 
-class CreditCardAccountDepositError(CreditCardError):
+class StoreCardAccountDepositError(StoreCardError):
     pass
 
 
-class CreditCardAccountWithdrawalError(CreditCardError):
+class StoreCardAccountWithdrawalError(StoreCardError):
     pass
