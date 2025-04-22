@@ -5,15 +5,16 @@ from typing import override
 from utils.types import TableName
 from utils.helpers import wrap_error
 from features.accounts.base import Accounts
-from features.accounts.credit_card.exceptions import (
-    CreditCardAccountOpenError,
-    CreditCardAccountCloseError,
-    CreditCardAccountDepositError,
-    CreditCardAccountWithdrawalError,
+from features.accounts.exceptions import AccountHasBalanceError
+from features.accounts.store_card.exceptions import (
+    StoreCardAccountOpenError,
+    StoreCardAccountCloseError,
+    StoreCardAccountDepositError,
+    StoreCardAccountWithdrawalError,
 )
 
 
-class CreditCard(Accounts):
+class StoreCard(Accounts):
     def __init__(self, connection: sqlite3.Connection) -> None:
         super().__init__(connection, TableName.BANKS)
 
@@ -23,8 +24,8 @@ class CreditCard(Accounts):
             super().open(data)
         except Exception as e:
             wrapper = wrap_error(
-                CreditCardAccountOpenError,
-                "Unable to open credit card account.",
+                StoreCardAccountOpenError,
+                "Unable to open store card account.",
             )
             raise wrapper(e) from e
 
@@ -34,18 +35,27 @@ class CreditCard(Accounts):
             super().close(id)
         except Exception as e:
             wrapper = wrap_error(
-                CreditCardAccountCloseError,
-                "Unable to close credit card account.",
+                StoreCardAccountCloseError,
+                "Unable to close store card account.",
             )
             raise wrapper(e) from e
 
     @override
     def withdraw(self, id: int, amount: float) -> None:
         try:
+            account = self.get_one(id)[0]
+            balance = float(account.get("balance", 0.0))
+            limit = float(account.get("credit_limit", 0.0))
+
+            if (balance - amount) < -limit:
+                raise AccountHasBalanceError(
+                    "Insufficient funds for this transaction."
+                )
+
             super().withdraw(id, amount)
         except Exception as e:
             wrapper = wrap_error(
-                CreditCardAccountWithdrawalError,
+                StoreCardAccountWithdrawalError,
                 "Unable to complete withdrawal.",
             )
             raise wrapper(e) from e
@@ -53,9 +63,20 @@ class CreditCard(Accounts):
     @override
     def deposit(self, id: int, amount: float) -> None:
         try:
+            account = self.get_one(id)[0]
+            balance_str = account.get("balance")
+            balance = float(balance_str) if balance_str else 0.0
+
+            new_balance = balance + amount
+            if new_balance > 0:
+                raise AccountHasBalanceError(
+                    "Deposit would result in a positive balance on the "
+                    "store card account."
+                )
+
             super().deposit(id, amount)
         except Exception as e:
             wrapper = wrap_error(
-                CreditCardAccountDepositError, "Unable to complete deposit."
+                StoreCardAccountDepositError, "Unable to complete deposit."
             )
             raise wrapper(e) from e

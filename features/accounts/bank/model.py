@@ -5,6 +5,7 @@ from typing import override
 from utils.types import TableName
 from utils.helpers import wrap_error
 from features.accounts.base import Accounts
+from features.accounts.exceptions import AccountHasBalanceError
 from features.accounts.bank.exceptions import (
     BankAccountOpenError,
     BankAccountCloseError,
@@ -40,6 +41,15 @@ class Bank(Accounts):
     @override
     def withdraw(self, id: int, amount: float) -> None:
         try:
+            account = self.get_one(id)[0]
+            balance = float(account.get("balance", 0.0))
+            overdraft = float(account.get("overdraft", 0.0))
+
+            if balance + overdraft < amount:
+                raise AccountHasBalanceError(
+                    "Insufficient funds for this transaction."
+                )
+
             super().withdraw(id, amount)
         except Exception as e:
             wrapper = wrap_error(

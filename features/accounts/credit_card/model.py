@@ -5,6 +5,7 @@ from typing import override
 from utils.types import TableName
 from utils.helpers import wrap_error
 from features.accounts.base import Accounts
+from features.accounts.exceptions import AccountHasBalanceError
 from features.accounts.credit_card.exceptions import (
     CreditCardAccountOpenError,
     CreditCardAccountCloseError,
@@ -42,6 +43,15 @@ class CreditCard(Accounts):
     @override
     def withdraw(self, id: int, amount: float) -> None:
         try:
+            account = self.get_one(id)[0]
+            balance = float(account.get("balance", 0.0))
+            limit = float(account.get("credit_limit", 0.0))
+
+            if (balance - amount) < -limit:
+                raise AccountHasBalanceError(
+                    "Insufficient funds for this transaction."
+                )
+
             super().withdraw(id, amount)
         except Exception as e:
             wrapper = wrap_error(
@@ -53,9 +63,20 @@ class CreditCard(Accounts):
     @override
     def deposit(self, id: int, amount: float) -> None:
         try:
+            account = self.get_one(id)[0]
+            balance = float(account.get("balance", 0.0))
+
+            new_balance = balance + amount
+            if new_balance > 0:
+                raise AccountHasBalanceError(
+                    "Deposit would overpay the account and result in positive "
+                    "balance."
+                )
+
             super().deposit(id, amount)
         except Exception as e:
             wrapper = wrap_error(
-                CreditCardAccountDepositError, "Unable to complete deposit."
+                CreditCardAccountDepositError,
+                "Unable to complete deposit.",
             )
             raise wrapper(e) from e
