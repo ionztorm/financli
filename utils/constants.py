@@ -11,13 +11,13 @@ TYPE_CONFIG = {
     },
     TableName.CREDITCARDS: {
         "is_source": True,
-        "is_destination": False,
+        "is_destination": True,
         "display_name": "credit card",
     },
     TableName.STORECARDS: {
         "is_source": True,
-        "is_destination": False,
-        "display_name": "credit card",
+        "is_destination": True,
+        "display_name": "store card",
     },
     TableName.LOANS: {
         "is_source": False,
@@ -26,12 +26,12 @@ TYPE_CONFIG = {
     },
     TableName.BILLS: {
         "is_source": False,
-        "is_destination": True,
+        "is_destination": False,
         "display_name": "bill",
     },
     TableName.SUBSCRIPTIONS: {
         "is_source": False,
-        "is_destination": True,
+        "is_destination": False,
         "display_name": "subscription",
     },
 }
