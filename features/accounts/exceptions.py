@@ -14,7 +14,7 @@ class AccountDeletionError(AccountError):
     pass
 
 
-class AccountValidationError(AccountError):
+class AccountOpenError(AccountError):
     pass
 
 

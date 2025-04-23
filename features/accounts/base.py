@@ -9,9 +9,9 @@ from core.exceptions import (
     RecordNotFoundError,
 )
 from features.accounts.exceptions import (
+    AccountOpenError,
     AccountDeletionError,
     AccountNotFoundError,
-    AccountValidationError,
     AccountWithdrawalError,
 )
 
@@ -26,14 +26,10 @@ class Accounts(Table):
         try:
             self._create(data)
         except ValidationError as e:
-            wrapper = wrap_error(
-                AccountValidationError, "Could not open account"
-            )
+            wrapper = wrap_error(AccountOpenError, "Could not open account")
             raise wrapper(e) from e
         except QueryExecutionError as e:
-            wrapper = wrap_error(
-                AccountValidationError, "Account creation failed"
-            )
+            wrapper = wrap_error(AccountOpenError, "Account creation failed")
             raise wrapper(e) from e
 
     def close(self, id: int) -> None:

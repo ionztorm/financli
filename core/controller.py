@@ -1,12 +1,12 @@
 import sqlite3
 
-from features.accounts.credit_card.model import CreditCard
-from features.accounts.store_card.model import StoreCard
 from utils.types import TableName
 from utils.helpers import wrap_error
 from utils.constants import TYPE_CONFIG
 from utils.model_types import ModelType
 from features.accounts.bank.model import Bank
+from features.accounts.store_card.model import StoreCard
+from features.accounts.credit_card.model import CreditCard
 
 
 class TransactionError(Exception):
