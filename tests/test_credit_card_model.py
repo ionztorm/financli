@@ -1,12 +1,9 @@
-# ✅ test_credit_card_model.py
 import sqlite3
 import unittest
 
 from core.exceptions import RecordNotFoundError
 from features.accounts.credit_card.model import CreditCard
-from features.accounts.credit_card.schema import (
-    CREATE_CREDIT_CARDS_TABLE,
-)
+from features.accounts.credit_card.schema import CREATE_CREDIT_CARDS_TABLE
 from features.accounts.credit_card.exceptions import (
     CreditCardAccountOpenError,
     CreditCardAccountCloseError,
@@ -34,8 +31,6 @@ class TestCreditCard(unittest.TestCase):
                 "provider": "Visa",
                 "balance": "0.0",
                 "credit_limit": "1000.0",
-                "is_source": "1",
-                "is_destination": "1",
             }
         )
         result = self.card.get_one(1)
@@ -62,9 +57,9 @@ class TestCreditCard(unittest.TestCase):
 
     def test_withdraw_valid(self) -> None:
         self.cursor.execute(
-            "INSERT INTO banks (provider, balance, credit_limit, "
-            "is_source, is_destination) VALUES (?, ?, ?, ?, ?)",
-            ("Visa", -100.0, 500.0, 1, 1),
+            "INSERT INTO banks (provider, balance, credit_limit) "
+            "VALUES (?, ?, ?)",
+            ("Visa", -100.0, 500.0),
         )
         self.connection.commit()
         self.card.withdraw(1, 100.0)
@@ -87,9 +82,9 @@ class TestCreditCard(unittest.TestCase):
 
     def test_deposit_valid(self) -> None:
         self.cursor.execute(
-            "INSERT INTO banks (provider, balance, credit_limit, "
-            "is_source, is_destination) VALUES (?, ?, ?, ?, ?)",
-            ("Visa", -100.0, 500.0, 1, 1),
+            "INSERT INTO banks (provider, balance, credit_limit) "
+            "VALUES (?, ?, ?)",
+            ("Visa", -100.0, 500.0),
         )
         self.connection.commit()
         self.card.deposit(1, 100.0)

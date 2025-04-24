@@ -3,9 +3,7 @@ import unittest
 
 from core.exceptions import RecordNotFoundError
 from features.accounts.store_card.model import StoreCard
-from features.accounts.store_card.schema import (
-    CREATE_STORE_CARDS_TABLE,
-)
+from features.accounts.store_card.schema import CREATE_STORE_CARDS_TABLE
 from features.accounts.store_card.exceptions import (
     StoreCardAccountOpenError,
     StoreCardAccountCloseError,
@@ -33,8 +31,6 @@ class TestStoreCard(unittest.TestCase):
                 "provider": "Target",
                 "balance": "0.0",
                 "credit_limit": "300.0",
-                "is_source": "1",
-                "is_destination": "1",
             }
         )
         result = self.card.get_one(1)
@@ -61,9 +57,9 @@ class TestStoreCard(unittest.TestCase):
 
     def test_withdraw_valid(self) -> None:
         self.cursor.execute(
-            "INSERT INTO banks (provider, balance, credit_limit, "
-            "is_source, is_destination) VALUES (?, ?, ?, ?, ?)",
-            ("Target", -50.0, 300.0, 1, 1),
+            "INSERT INTO banks (provider, balance, credit_limit) "
+            "VALUES (?, ?, ?)",
+            ("Target", -50.0, 300.0),
         )
         self.connection.commit()
         self.card.withdraw(1, 50.0)
@@ -86,9 +82,9 @@ class TestStoreCard(unittest.TestCase):
 
     def test_deposit_valid(self) -> None:
         self.cursor.execute(
-            "INSERT INTO banks (provider, balance, credit_limit, "
-            "is_source, is_destination) VALUES (?, ?, ?, ?, ?)",
-            ("Target", -100.0, 300.0, 1, 1),
+            "INSERT INTO banks (provider, balance, credit_limit) "
+            "VALUES (?, ?, ?)",
+            ("Target", -100.0, 300.0),
         )
         self.connection.commit()
         self.card.deposit(1, 100.0)
