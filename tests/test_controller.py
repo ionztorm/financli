@@ -36,7 +36,7 @@ class TestController(unittest.TestCase):
             "is_destination": "1",
         }
         self.controller.open(data)
-        result = self.controller.bank_model.get_one(1)
+        result = self.controller.utility.bank_model.get_one(1)
         self.assertEqual(result[0]["provider"], "BankX")
         self.assertEqual(result[0]["balance"], 200.0)
 
@@ -69,7 +69,7 @@ class TestController(unittest.TestCase):
         self.controller.close("bank", 1)
 
         with self.assertRaises(RecordNotFoundError):
-            self.controller.bank_model.get_one(1)
+            self.controller.utility.bank_model.get_one(1)
 
     def test_close_nonexistent_account(self) -> None:
         with self.assertRaises(BankAccountCloseError):
@@ -85,7 +85,7 @@ class TestController(unittest.TestCase):
         self.controller.deposit(
             {"account_type": "bank", "id": 1, "amount": 50.0}
         )
-        result = self.controller.bank_model.get_one(1)
+        result = self.controller.utility.bank_model.get_one(1)
         self.assertEqual(result[0]["balance"], 250.0)
 
     def test_deposit_nonexistent_account(self) -> None:
@@ -104,7 +104,7 @@ class TestController(unittest.TestCase):
         self.controller.withdraw(
             {"account_type": "bank", "id": 1, "amount": 150.0}
         )
-        result = self.controller.bank_model.get_one(1)
+        result = self.controller.utility.bank_model.get_one(1)
         self.assertEqual(result[0]["balance"], 50.0)
 
     def test_withdraw_insufficient_funds(self) -> None:
@@ -150,8 +150,8 @@ class TestController(unittest.TestCase):
             }
         )
 
-        source = self.controller.bank_model.get_one(1)
-        dest = self.controller.bank_model.get_one(2)
+        source = self.controller.utility.bank_model.get_one(1)
+        dest = self.controller.utility.bank_model.get_one(2)
         self.assertEqual(source[0]["balance"], 250.0)
         self.assertEqual(dest[0]["balance"], 150.0)
 
@@ -179,7 +179,7 @@ class TestController(unittest.TestCase):
         self.controller.deposit(
             {"account_type": "bank", "id": "1", "amount": "50.0"}
         )
-        result = self.controller.bank_model.get_one(1)
+        result = self.controller.utility.bank_model.get_one(1)
         self.assertEqual(result[0]["balance"], 150.0)
 
     def test_withdraw_with_string_id_and_amount(self) -> None:
@@ -193,7 +193,7 @@ class TestController(unittest.TestCase):
         self.controller.withdraw(
             {"account_type": "bank", "id": "1", "amount": "75.0"}
         )
-        result = self.controller.bank_model.get_one(1)
+        result = self.controller.utility.bank_model.get_one(1)
         self.assertEqual(result[0]["balance"], 125.0)
 
     def test_validate_account_type_missing(self) -> None:
