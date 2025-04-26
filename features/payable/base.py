@@ -15,19 +15,15 @@ from features.payable.exceptions import (
 )
 
 
-class Payable(Table):
-    def __init__(
-        self, connection: sqlite3.Connection, table_name: TableName
-    ) -> None:
+class PayOnly(Table):
+    def __init__(self, connection: sqlite3.Connection, table_name: TableName) -> None:
         super().__init__(connection, table_name)
 
     def open(self, data: dict) -> None:
         try:
             self._create(data)
         except ValidationError as e:
-            wrapper = wrap_error(
-                PayableOpenError, "Could not create new payable"
-            )
+            wrapper = wrap_error(PayableOpenError, "Could not create new payable")
             raise wrapper(e) from e
         except QueryExecutionError as e:
             wrapper = wrap_error(PayableOpenError, "Payable creation failed")
@@ -43,12 +39,8 @@ class Payable(Table):
         try:
             self._delete(id)
         except RecordNotFoundError as e:
-            wrapper = wrap_error(
-                PayableNotFoundError, "Unable to find payable for deletion"
-            )
+            wrapper = wrap_error(PayableNotFoundError, "Unable to find payable for deletion")
             raise wrapper(e) from e
         except QueryExecutionError as e:
-            wrapper = wrap_error(
-                PayableDeletionError, "Could not delete payable"
-            )
+            wrapper = wrap_error(PayableDeletionError, "Could not delete payable")
             raise wrapper(e) from e

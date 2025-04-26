@@ -4,9 +4,12 @@ from utils.types import TableName
 from utils.helpers import wrap_error
 from utils.constants import TYPE_CONFIG
 from utils.model_types import ModelType
+from features.payable.base import PayOnly
+from features.payable.bill.model import Bills
 from features.accounts.bank.model import Bank
 from features.accounts.store_card.model import StoreCard
 from features.accounts.credit_card.model import CreditCard
+from features.payable.subscription.model import Subscriptions
 
 
 class TransactionError(Exception):
@@ -20,19 +23,16 @@ class Controller:
         self.bank_model = Bank(db_connection)
         self.credit_card_model = CreditCard(db_connection)
         self.store_card_model = StoreCard(db_connection)
-
+        self.bill_model = Bills(db_connection)
+        self.subcription_model = Subscriptions(db_connection)
         self.valid_account_types = self._get_valid_account_types()
         self.source_types = self.valid_account_types["source_types"]
         self.destination_types = self.valid_account_types["dest_types"]
 
         self._model_map: dict[str, ModelType] = {
             TYPE_CONFIG[TableName.BANKS]["display_name"]: self.bank_model,
-            TYPE_CONFIG[TableName.CREDITCARDS][
-                "display_name"
-            ]: self.credit_card_model,
-            TYPE_CONFIG[TableName.STORECARDS][
-                "display_name"
-            ]: self.store_card_model,
+            TYPE_CONFIG[TableName.CREDITCARDS]["display_name"]: self.credit_card_model,
+            TYPE_CONFIG[TableName.STORECARDS]["display_name"]: self.store_card_model,
         }
 
     def _get_valid_account_types(self) -> dict:
@@ -66,9 +66,7 @@ class Controller:
 
     def _get_destination_model(self, account_type: str) -> ModelType:
         if account_type not in self.destination_types:
-            raise ValueError(
-                f"Unsupported destination account type: {account_type}"
-            )
+            raise ValueError(f"Unsupported destination account type: {account_type}")
         return self._get_model(account_type)
 
     def list(self, data: dict) -> list[dict]:
@@ -89,9 +87,7 @@ class Controller:
         account_type = self._require_non_empty_str(account_type, "Account type")
 
         if not isinstance(id, int):
-            raise ValueError(
-                "Account ID must be an integer and cannot be empty."
-            )
+            raise ValueError("Account ID must be an integer and cannot be empty.")
 
         model = self._get_model(account_type)
         model.close(id)
@@ -101,6 +97,8 @@ class Controller:
         amount = self._get_amount(data)
 
         model = self._get_destination_model(account_type)
+        if isinstance(model, PayOnly):
+            raise ValueError(f"Cannot deposit into {account_type}.")
         model.deposit(account_id, amount)
 
     def withdraw(self, data: dict) -> None:
@@ -108,6 +106,8 @@ class Controller:
         amount = self._get_amount(data)
 
         model = self._get_source_model(account_type)
+        if isinstance(model, PayOnly):
+            raise ValueError(f"Cannot withdraw from {account_type}.")
         model.withdraw(account_id, amount)
 
     def transaction(self, data: dict) -> None:
@@ -157,11 +157,7 @@ class Controller:
         try:
             return int(raw_id)
         except (ValueError, TypeError) as e:
-            raise ValueError(
-                "Account ID must be convertible to an integer."
-            ) from e
+            raise ValueError("Account ID must be convertible to an integer.") from e
 
     def _get_account_type(self, data: dict) -> str:
-        return self._require_non_empty_str(
-            data.get("account_type"), "Account type"
-        )
+        return self._require_non_empty_str(data.get("account_type"), "Account type")
