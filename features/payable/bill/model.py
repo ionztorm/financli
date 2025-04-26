@@ -12,10 +12,8 @@ from features.payable.bill.exceptions import (
 
 
 class Bills(Payable):
-    def __init__(
-        self, connection: sqlite3.Connection, table_name: TableName
-    ) -> None:
-        super().__init__(connection, table_name)
+    def __init__(self, connection: sqlite3.Connection) -> None:
+        super().__init__(connection, TableName.BILLS)
 
     @override
     def open(self, data: dict) -> None:

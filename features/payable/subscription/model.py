@@ -12,10 +12,8 @@ from features.payable.subscription.exceptions import (
 
 
 class Subscriptions(Payable):
-    def __init__(
-        self, connection: sqlite3.Connection, table_name: TableName
-    ) -> None:
-        super().__init__(connection, table_name)
+    def __init__(self, connection: sqlite3.Connection) -> None:
+        super().__init__(connection, TableName.SUBSCRIPTIONS)
 
     @override
     def open(self, data: dict) -> None:
