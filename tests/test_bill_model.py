@@ -1,7 +1,6 @@
 import sqlite3
 import unittest
 
-from utils.types import TableName
 from core.exceptions import RecordNotFoundError
 from features.payable.bill.model import Bills
 from features.payable.bill.schema import CREATE_BILLS_TABLE
@@ -17,7 +16,7 @@ class TestBills(unittest.TestCase):
         self.cursor = self.connection.cursor()
         self.cursor.execute(CREATE_BILLS_TABLE)
         self.connection.commit()
-        self.bills = Bills(self.connection, TableName.BILLS)
+        self.bills = Bills(self.connection)
 
     def tearDown(self) -> None:
         self.cursor.execute("DROP TABLE IF EXISTS bills")

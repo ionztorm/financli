@@ -1,7 +1,6 @@
 import sqlite3
 import unittest
 
-from utils.types import TableName
 from core.exceptions import RecordNotFoundError
 from features.payable.subscription.model import Subscriptions
 from features.payable.subscription.schema import CREATE_SUBSCRIPTIONS_TABLE
@@ -17,9 +16,7 @@ class TestSubscriptions(unittest.TestCase):
         self.cursor = self.connection.cursor()
         self.cursor.execute(CREATE_SUBSCRIPTIONS_TABLE)
         self.connection.commit()
-        self.subscriptions = Subscriptions(
-            self.connection, TableName.SUBSCRIPTIONS
-        )
+        self.subscriptions = Subscriptions(self.connection)
 
     def tearDown(self) -> None:
         self.cursor.execute("DROP TABLE IF EXISTS subscriptions")
