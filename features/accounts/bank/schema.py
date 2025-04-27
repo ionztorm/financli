@@ -4,6 +4,6 @@ CREATE_BANKS_TABLE = """
         provider TEXT NOT NULL,
         alias TEXT,
         balance REAL NOT NULL,
-        overdraft REAL NOT NULL
+        limiter REAL NOT NULL
     )
 """

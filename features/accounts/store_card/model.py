@@ -45,7 +45,7 @@ class StoreCard(Accounts):
         try:
             account = self.get_one(id)[0]
             balance = float(account.get("balance", 0.0))
-            limit = float(account.get("credit_limit", 0.0))
+            limit = float(account.get("limiter", 0.0))
 
             if (balance - amount) < -limit:
                 raise AccountHasBalanceError(

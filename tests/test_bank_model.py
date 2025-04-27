@@ -30,7 +30,7 @@ class TestBank(unittest.TestCase):
             "provider": "BankA",
             "alias": "Savings",
             "balance": "100.0",
-            "overdraft": "50.0",
+            "limiter": "50.0",
         }
         self.bank.open(data)
         result = self.bank.get_one(1)
@@ -42,7 +42,7 @@ class TestBank(unittest.TestCase):
                     "provider": "BankA",
                     "alias": "Savings",
                     "balance": 100.0,
-                    "overdraft": 50.0,
+                    "limiter": 50.0,
                 }
             ],
         )
@@ -56,7 +56,7 @@ class TestBank(unittest.TestCase):
 
     def test_close_account_valid(self) -> None:
         self.cursor.execute(
-            "INSERT INTO banks (provider, alias, balance, overdraft) "
+            "INSERT INTO banks (provider, alias, balance, limiter) "
             "VALUES (?, ?, ?, ?)",
             ("BankA", "Savings", 100.0, 50.0),
         )
@@ -73,7 +73,7 @@ class TestBank(unittest.TestCase):
 
     def test_withdraw_valid(self) -> None:
         self.cursor.execute(
-            "INSERT INTO banks (provider, alias, balance, overdraft) "
+            "INSERT INTO banks (provider, alias, balance, limiter) "
             "VALUES (?, ?, ?, ?)",
             ("BankA", "Savings", 100.0, 50.0),
         )
@@ -88,7 +88,7 @@ class TestBank(unittest.TestCase):
                     "provider": "BankA",
                     "alias": "Savings",
                     "balance": -20.0,
-                    "overdraft": 50.0,
+                    "limiter": 50.0,
                 }
             ],
         )
@@ -101,7 +101,7 @@ class TestBank(unittest.TestCase):
 
     def test_withdraw_insufficient_funds(self) -> None:
         self.cursor.execute(
-            "INSERT INTO banks (provider, alias, balance, overdraft) "
+            "INSERT INTO banks (provider, alias, balance, limiter) "
             "VALUES (?, ?, ?, ?)",
             ("BankA", "Savings", 100.0, 50.0),
         )
@@ -116,7 +116,7 @@ class TestBank(unittest.TestCase):
 
     def test_deposit_valid(self) -> None:
         self.cursor.execute(
-            "INSERT INTO banks (provider, alias, balance, overdraft) "
+            "INSERT INTO banks (provider, alias, balance, limiter) "
             "VALUES (?, ?, ?, ?)",
             ("BankA", "Savings", 100.0, 50.0),
         )
@@ -131,7 +131,7 @@ class TestBank(unittest.TestCase):
                     "provider": "BankA",
                     "alias": "Savings",
                     "balance": 150.0,
-                    "overdraft": 50.0,
+                    "limiter": 50.0,
                 }
             ],
         )

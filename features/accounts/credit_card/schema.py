@@ -3,6 +3,6 @@ CREATE_CREDIT_CARDS_TABLE = """
         id INTEGER PRIMARY KEY,
         provider TEXT NOT NULL,
         balance REAL NOT NULL,
-        credit_limit REAL NOT NULL
+        limiter REAL NOT NULL
     )
 """

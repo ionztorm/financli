@@ -30,7 +30,7 @@ class TestCreditCard(unittest.TestCase):
             {
                 "provider": "Visa",
                 "balance": "0.0",
-                "credit_limit": "1000.0",
+                "limiter": "1000.0",
             }
         )
         result = self.card.get_one(1)
@@ -42,8 +42,7 @@ class TestCreditCard(unittest.TestCase):
 
     def test_close_account_valid(self) -> None:
         self.cursor.execute(
-            "INSERT INTO banks (provider, balance, credit_limit) "
-            "VALUES (?, ?, ?)",
+            "INSERT INTO banks (provider, balance, limiter) VALUES (?, ?, ?)",
             ("Visa", 0.0, 500.0),
         )
         self.connection.commit()
@@ -57,8 +56,7 @@ class TestCreditCard(unittest.TestCase):
 
     def test_withdraw_valid(self) -> None:
         self.cursor.execute(
-            "INSERT INTO banks (provider, balance, credit_limit) "
-            "VALUES (?, ?, ?)",
+            "INSERT INTO banks (provider, balance, limiter) VALUES (?, ?, ?)",
             ("Visa", -100.0, 500.0),
         )
         self.connection.commit()
@@ -72,8 +70,7 @@ class TestCreditCard(unittest.TestCase):
 
     def test_withdraw_insufficient_funds(self) -> None:
         self.cursor.execute(
-            "INSERT INTO banks (provider, balance, credit_limit) "
-            "VALUES (?, ?, ?)",
+            "INSERT INTO banks (provider, balance, limiter) VALUES (?, ?, ?)",
             ("Visa", 0.0, 100.0),
         )
         self.connection.commit()
@@ -82,8 +79,7 @@ class TestCreditCard(unittest.TestCase):
 
     def test_deposit_valid(self) -> None:
         self.cursor.execute(
-            "INSERT INTO banks (provider, balance, credit_limit) "
-            "VALUES (?, ?, ?)",
+            "INSERT INTO banks (provider, balance, limiter) VALUES (?, ?, ?)",
             ("Visa", -100.0, 500.0),
         )
         self.connection.commit()
@@ -97,8 +93,7 @@ class TestCreditCard(unittest.TestCase):
 
     def test_deposit_exceeds_balance_limit(self) -> None:
         self.cursor.execute(
-            "INSERT INTO banks (provider, balance, credit_limit) "
-            "VALUES (?, ?, ?)",
+            "INSERT INTO banks (provider, balance, limiter) VALUES (?, ?, ?)",
             ("Visa", -50.0, 500.0),
         )
         self.connection.commit()

@@ -31,7 +31,7 @@ class TestController(unittest.TestCase):
             "provider": "BankX",
             "alias": "Main",
             "balance": "200.0",
-            "overdraft": "100.0",
+            "limiter": "100.0",
             "is_source": "1",
             "is_destination": "1",
         }
@@ -61,7 +61,7 @@ class TestController(unittest.TestCase):
 
     def test_close_valid_account(self) -> None:
         self.cursor.execute(
-            "INSERT INTO banks (provider, alias, balance, overdraft) "
+            "INSERT INTO banks (provider, alias, balance, limiter) "
             "VALUES (?, ?, ?, ?)",
             ("BankX", "Main", 200.0, 100.0),
         )
@@ -77,7 +77,7 @@ class TestController(unittest.TestCase):
 
     def test_deposit_valid(self) -> None:
         self.cursor.execute(
-            "INSERT INTO banks (provider, alias, balance, overdraft) "
+            "INSERT INTO banks (provider, alias, balance, limiter) "
             "VALUES (?, ?, ?, ?)",
             ("BankX", "Main", 200.0, 100.0),
         )
@@ -96,7 +96,7 @@ class TestController(unittest.TestCase):
 
     def test_withdraw_valid(self) -> None:
         self.cursor.execute(
-            "INSERT INTO banks (provider, alias, balance, overdraft) "
+            "INSERT INTO banks (provider, alias, balance, limiter) "
             "VALUES (?, ?, ?, ?)",
             ("BankX", "Main", 200.0, 100.0),
         )
@@ -109,7 +109,7 @@ class TestController(unittest.TestCase):
 
     def test_withdraw_insufficient_funds(self) -> None:
         self.cursor.execute(
-            "INSERT INTO banks (provider, alias, balance, overdraft) "
+            "INSERT INTO banks (provider, alias, balance, limiter) "
             "VALUES (?, ?, ?, ?)",
             ("BankX", "Main", 50.0, 10.0),
         )
@@ -129,12 +129,12 @@ class TestController(unittest.TestCase):
 
     def test_transaction_valid(self) -> None:
         self.cursor.execute(
-            "INSERT INTO banks (provider, alias, balance, overdraft) "
+            "INSERT INTO banks (provider, alias, balance, limiter) "
             "VALUES (?, ?, ?, ?)",
             ("BankX", "Source", 300.0, 0.0),
         )
         self.cursor.execute(
-            "INSERT INTO banks (provider, alias, balance, overdraft) "
+            "INSERT INTO banks (provider, alias, balance, limiter) "
             "VALUES (?, ?, ?, ?)",
             ("BankX", "Destination", 100.0, 0.0),
         )
@@ -170,7 +170,7 @@ class TestController(unittest.TestCase):
 
     def test_deposit_with_string_id_and_amount(self) -> None:
         self.cursor.execute(
-            "INSERT INTO banks (provider, alias, balance, overdraft) "
+            "INSERT INTO banks (provider, alias, balance, limiter) "
             "VALUES (?, ?, ?, ?)",
             ("BankX", "Main", 100.0, 0.0),
         )
@@ -184,7 +184,7 @@ class TestController(unittest.TestCase):
 
     def test_withdraw_with_string_id_and_amount(self) -> None:
         self.cursor.execute(
-            "INSERT INTO banks (provider, alias, balance, overdraft) "
+            "INSERT INTO banks (provider, alias, balance, limiter) "
             "VALUES (?, ?, ?, ?)",
             ("BankX", "Main", 200.0, 0.0),
         )
@@ -213,7 +213,7 @@ class TestController(unittest.TestCase):
 
     def test_validate_amount_invalid_type(self) -> None:
         self.cursor.execute(
-            "INSERT INTO banks (provider, alias, balance, overdraft) "
+            "INSERT INTO banks (provider, alias, balance, limiter) "
             "VALUES (?, ?, ?, ?)",
             ("BankX", "Main", 200.0, 0.0),
         )
@@ -254,12 +254,12 @@ class TestController(unittest.TestCase):
 
     def test_list_many_accounts(self) -> None:
         self.cursor.execute(
-            "INSERT INTO banks (provider, alias, balance, overdraft) "
+            "INSERT INTO banks (provider, alias, balance, limiter) "
             "VALUES (?, ?, ?, ?)",
             ("BankX", "Main", 100.0, 0.0),
         )
         self.cursor.execute(
-            "INSERT INTO banks (provider, alias, balance, overdraft) "
+            "INSERT INTO banks (provider, alias, balance, limiter) "
             "VALUES (?, ?, ?, ?)",
             ("BankY", "Spare", 200.0, 50.0),
         )
@@ -272,7 +272,7 @@ class TestController(unittest.TestCase):
 
     def test_list_one_account_by_id(self) -> None:
         self.cursor.execute(
-            "INSERT INTO banks (provider, alias, balance, overdraft) "
+            "INSERT INTO banks (provider, alias, balance, limiter) "
             "VALUES (?, ?, ?, ?)",
             ("BankX", "Main", 100.0, 0.0),
         )

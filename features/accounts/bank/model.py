@@ -43,9 +43,9 @@ class Bank(Accounts):
         try:
             account = self.get_one(id)[0]
             balance = float(account.get("balance", 0.0))
-            overdraft = float(account.get("overdraft", 0.0))
+            limiter = float(account.get("limiter", 0.0))
 
-            if balance + overdraft < amount:
+            if balance + limiter < amount:
                 raise AccountHasBalanceError(
                     "Insufficient funds for this transaction."
                 )

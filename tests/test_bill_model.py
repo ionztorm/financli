@@ -26,7 +26,7 @@ class TestBills(unittest.TestCase):
     def test_open_bill_provider_valid(self) -> None:
         data = {
             "provider": "Electric Co",
-            "monthly_bill": "75.50",
+            "monthly_charge": "75.50",
         }
         self.bills.open(data)
         result = self.bills.get_one(1)
@@ -36,14 +36,14 @@ class TestBills(unittest.TestCase):
                 {
                     "id": 1,
                     "provider": "Electric Co",
-                    "monthly_bill": 75.50,
+                    "monthly_charge": 75.50,
                 }
             ],
         )
 
     def test_open_bill_provider_missing_required(self) -> None:
         data = {
-            "monthly_bill": "75.50",
+            "monthly_charge": "75.50",
         }
         with self.assertRaises(BillProviderCreationError) as context:
             self.bills.open(data)
@@ -52,7 +52,7 @@ class TestBills(unittest.TestCase):
 
     def test_close_existing_provider(self) -> None:
         self.cursor.execute(
-            "INSERT INTO bills (provider, monthly_bill) VALUES (?, ?)",
+            "INSERT INTO bills (provider, monthly_charge) VALUES (?, ?)",
             ("Electric Co", 75.50),
         )
         self.connection.commit()

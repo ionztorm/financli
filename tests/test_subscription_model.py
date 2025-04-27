@@ -26,7 +26,7 @@ class TestSubscriptions(unittest.TestCase):
     def test_open_subscription_valid(self) -> None:
         data = {
             "provider": "Netflix",
-            "subscription_charge": "15.00",
+            "monthly_charge": "15.00",
         }
         self.subscriptions.open(data)
         result = self.subscriptions.get_one(1)
@@ -36,7 +36,7 @@ class TestSubscriptions(unittest.TestCase):
                 {
                     "id": 1,
                     "provider": "Netflix",
-                    "subscription_charge": 15.0,
+                    "monthly_charge": 15.0,
                 }
             ],
         )
@@ -50,7 +50,7 @@ class TestSubscriptions(unittest.TestCase):
 
     def test_close_existing_subscription(self) -> None:
         self.cursor.execute(
-            "INSERT INTO subscriptions (provider, subscription_charge) "
+            "INSERT INTO subscriptions (provider, monthly_charge) "
             "VALUES (?, ?)",
             ("Netflix", 15.0),
         )
