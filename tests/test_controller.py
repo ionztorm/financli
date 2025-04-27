@@ -82,7 +82,7 @@ class TestController(unittest.TestCase):
             ("BankX", "Main", 200.0, 100.0),
         )
         self.connection.commit()
-        self.controller.deposit(
+        self.controller.transactions.deposit(
             {"account_type": "bank", "id": 1, "amount": 50.0}
         )
         result = self.controller.utility.bank_model.get_one(1)
@@ -90,7 +90,7 @@ class TestController(unittest.TestCase):
 
     def test_deposit_nonexistent_account(self) -> None:
         with self.assertRaises(BankAccountDepositError):
-            self.controller.deposit(
+            self.controller.transactions.deposit(
                 {"account_type": "bank", "id": 999, "amount": 50.0}
             )
 
@@ -101,7 +101,7 @@ class TestController(unittest.TestCase):
             ("BankX", "Main", 200.0, 100.0),
         )
         self.connection.commit()
-        self.controller.withdraw(
+        self.controller.transactions.withdraw(
             {"account_type": "bank", "id": 1, "amount": 150.0}
         )
         result = self.controller.utility.bank_model.get_one(1)
@@ -115,7 +115,7 @@ class TestController(unittest.TestCase):
         )
         self.connection.commit()
         with self.assertRaises(BankAccountWithdrawalError) as context:
-            self.controller.withdraw(
+            self.controller.transactions.withdraw(
                 {"account_type": "bank", "id": 1, "amount": 100.0}
             )
         self.assertIn("Unable to complete withdrawal", str(context.exception))
@@ -123,7 +123,7 @@ class TestController(unittest.TestCase):
 
     def test_withdraw_nonexistent_account(self) -> None:
         with self.assertRaises(BankAccountWithdrawalError):
-            self.controller.withdraw(
+            self.controller.transactions.withdraw(
                 {"account_type": "bank", "id": 999, "amount": 20.0}
             )
 
@@ -176,7 +176,7 @@ class TestController(unittest.TestCase):
         )
         self.connection.commit()
 
-        self.controller.deposit(
+        self.controller.transactions.deposit(
             {"account_type": "bank", "id": "1", "amount": "50.0"}
         )
         result = self.controller.utility.bank_model.get_one(1)
@@ -190,7 +190,7 @@ class TestController(unittest.TestCase):
         )
         self.connection.commit()
 
-        self.controller.withdraw(
+        self.controller.transactions.withdraw(
             {"account_type": "bank", "id": "1", "amount": "75.0"}
         )
         result = self.controller.utility.bank_model.get_one(1)
@@ -207,7 +207,7 @@ class TestController(unittest.TestCase):
 
     def test_validate_id_invalid_string(self) -> None:
         with self.assertRaises(ValueError):
-            self.controller.deposit(
+            self.controller.transactions.deposit(
                 {"account_type": "bank", "id": "abc", "amount": 50.0}
             )
 
@@ -220,7 +220,7 @@ class TestController(unittest.TestCase):
         self.connection.commit()
 
         with self.assertRaises(ValueError):
-            self.controller.deposit(
+            self.controller.transactions.deposit(
                 {
                     "account_type": "bank",
                     "id": 1,
@@ -230,7 +230,7 @@ class TestController(unittest.TestCase):
 
     def test_deposit_unsupported_account_type(self) -> None:
         with self.assertRaises(ValueError) as context:
-            self.controller.deposit(
+            self.controller.transactions.deposit(
                 {
                     "account_type": "store_card",
                     "id": 1,
@@ -243,7 +243,7 @@ class TestController(unittest.TestCase):
 
     def test_withdraw_unsupported_account_type(self) -> None:
         with self.assertRaises(ValueError) as context:
-            self.controller.withdraw(
+            self.controller.transactions.withdraw(
                 {
                     "account_type": "loan",
                     "id": 1,
