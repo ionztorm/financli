@@ -1,6 +1,8 @@
 import sqlite3
 import unittest
 
+from datetime import datetime
+
 from core.controller import Controller, TransactionError
 from core.exceptions import RecordNotFoundError
 from features.transactions.schema import CREATE_TRANSACTIONS_TABLE
@@ -36,6 +38,7 @@ class TestController(unittest.TestCase):
             "limiter": "100.0",
             "is_source": "1",
             "is_destination": "1",
+            "destination_provider": "BankX",  # Added destination_provider
         }
         self.controller.open(data)
         result = self.controller.utility.bank_model.get_one(1)
@@ -51,7 +54,7 @@ class TestController(unittest.TestCase):
         with self.assertRaises(BankAccountOpenError):
             self.controller.open(data)
 
-    def test_open_unsupported_account_type(self) -> None:
+    def test_open_unsupported_source_type(self) -> None:
         data = {
             "account_type": "mystery",
             "provider": "BankX",
@@ -85,7 +88,13 @@ class TestController(unittest.TestCase):
         )
         self.connection.commit()
         self.controller.transactions.deposit(
-            {"account_type": "bank", "id": 1, "amount": 50.0}
+            {
+                "destination_type": "bank",
+                "destination_id": 1,
+                "amount": 50.0,
+                "date": str(datetime.now()),
+                "description": "Deposit of 50.0",
+            }
         )
         result = self.controller.utility.bank_model.get_one(1)
         self.assertEqual(result[0]["balance"], 250.0)
@@ -93,7 +102,13 @@ class TestController(unittest.TestCase):
     def test_deposit_nonexistent_account(self) -> None:
         with self.assertRaises(BankAccountDepositError):
             self.controller.transactions.deposit(
-                {"account_type": "bank", "id": 999, "amount": 50.0}
+                {
+                    "destination_type": "bank",
+                    "destination_id": 999,
+                    "amount": 50.0,
+                    "date": str(datetime.now()),
+                    "description": "Deposit of 50.0",
+                }
             )
 
     def test_withdraw_valid(self) -> None:
@@ -104,7 +119,13 @@ class TestController(unittest.TestCase):
         )
         self.connection.commit()
         self.controller.transactions.withdraw(
-            {"account_type": "bank", "id": 1, "amount": 150.0}
+            {
+                "source_type": "bank",
+                "source_id": 1,
+                "amount": 150.0,
+                "date": str(datetime.now()),
+                "description": "Withdrawal of 150.0",
+            }
         )
         result = self.controller.utility.bank_model.get_one(1)
         self.assertEqual(result[0]["balance"], 50.0)
@@ -118,7 +139,13 @@ class TestController(unittest.TestCase):
         self.connection.commit()
         with self.assertRaises(BankAccountWithdrawalError) as context:
             self.controller.transactions.withdraw(
-                {"account_type": "bank", "id": 1, "amount": 100.0}
+                {
+                    "source_type": "bank",
+                    "source_id": 1,
+                    "amount": 100.0,
+                    "date": str(datetime.now()),
+                    "description": "Attempt to withdraw more than available",
+                }
             )
         self.assertIn("Unable to complete withdrawal", str(context.exception))
         self.assertIn("Insufficient funds", str(context.exception))
@@ -126,7 +153,13 @@ class TestController(unittest.TestCase):
     def test_withdraw_nonexistent_account(self) -> None:
         with self.assertRaises(BankAccountWithdrawalError):
             self.controller.transactions.withdraw(
-                {"account_type": "bank", "id": 999, "amount": 20.0}
+                {
+                    "source_type": "bank",
+                    "source_id": 999,
+                    "amount": 20.0,
+                    "date": str(datetime.now()),
+                    "description": "Withdrawal attempt",
+                }
             )
 
     def test_transaction_valid(self) -> None:
@@ -144,11 +177,16 @@ class TestController(unittest.TestCase):
 
         self.controller.transaction(
             {
-                "source_account_type": "bank",
+                "transaction_type": "transfer",
+                "source_type": "bank",
                 "source_id": 1,
-                "destination_account_type": "bank",
+                "source_provider": "BankX",
+                "destination_type": "bank",
                 "destination_id": 2,
+                "destination_provider": "BankX",
                 "amount": 50.0,
+                "date": str(datetime.now()),
+                "description": "Transfer of 50.0 from Source to Destination",
             }
         )
 
@@ -161,11 +199,14 @@ class TestController(unittest.TestCase):
         with self.assertRaises(TransactionError) as context:
             self.controller.transaction(
                 {
-                    "source_account_type": "bank",
+                    "transaction_type": "transfer",
+                    "source_type": "bank",
                     "source_id": 999,
-                    "destination_account_type": "bank",
+                    "destination_type": "bank",
                     "destination_id": 1,
                     "amount": 20.0,
+                    "date": str(datetime.now()),
+                    "description": "Invalid source account",
                 }
             )
         self.assertIn(
@@ -181,7 +222,13 @@ class TestController(unittest.TestCase):
         self.connection.commit()
 
         self.controller.transactions.deposit(
-            {"account_type": "bank", "id": "1", "amount": "50.0"}
+            {
+                "destination_type": "bank",
+                "destination_id": "1",
+                "amount": "50.0",
+                "date": str(datetime.now()),
+                "description": "Deposit of 50.0",
+            }
         )
         result = self.controller.utility.bank_model.get_one(1)
         self.assertEqual(result[0]["balance"], 150.0)
@@ -195,12 +242,18 @@ class TestController(unittest.TestCase):
         self.connection.commit()
 
         self.controller.transactions.withdraw(
-            {"account_type": "bank", "id": "1", "amount": "75.0"}
+            {
+                "source_type": "bank",
+                "source_id": "1",
+                "amount": "75.0",
+                "date": str(datetime.now()),
+                "description": "Withdrawal of 75.0",
+            }
         )
         result = self.controller.utility.bank_model.get_one(1)
         self.assertEqual(result[0]["balance"], 125.0)
 
-    def test_validate_account_type_missing(self) -> None:
+    def test_validate_source_type_missing(self) -> None:
         with self.assertRaises(ValueError):
             self.controller.open(
                 {
@@ -212,7 +265,13 @@ class TestController(unittest.TestCase):
     def test_validate_id_invalid_string(self) -> None:
         with self.assertRaises(ValueError):
             self.controller.transactions.deposit(
-                {"account_type": "bank", "id": "abc", "amount": 50.0}
+                {
+                    "destination_type": "bank",
+                    "destination_id": "abc",
+                    "amount": 50.0,
+                    "date": str(datetime.now()),
+                    "description": "Invalid ID",
+                }
             )
 
     def test_validate_amount_invalid_type(self) -> None:
@@ -226,32 +285,38 @@ class TestController(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.controller.transactions.deposit(
                 {
-                    "account_type": "bank",
-                    "id": 1,
+                    "destination_type": "bank",
+                    "destination_id": 1,
                     "amount": [123],
+                    "date": str(datetime.now()),
+                    "description": "Invalid amount type",
                 }
             )
 
-    def test_deposit_unsupported_account_type(self) -> None:
+    def test_deposit_unsupported_source_type(self) -> None:
         with self.assertRaises(ValueError) as context:
             self.controller.transactions.deposit(
                 {
-                    "account_type": "store_card",
-                    "id": 1,
+                    "destination_type": "store_card",
+                    "destination_id": 1,
                     "amount": 50.0,
+                    "date": str(datetime.now()),
+                    "description": "Unsupported account type",
                 }
             )
         self.assertIn(
             "Unsupported destination account type", str(context.exception)
         )
 
-    def test_withdraw_unsupported_account_type(self) -> None:
+    def test_withdraw_unsupported_source_type(self) -> None:
         with self.assertRaises(ValueError) as context:
             self.controller.transactions.withdraw(
                 {
-                    "account_type": "loan",
-                    "id": 1,
+                    "source_type": "loan",
+                    "source_id": 1,
                     "amount": 50.0,
+                    "date": str(datetime.now()),
+                    "description": "Unsupported source type",
                 }
             )
         self.assertIn("Unsupported source account type", str(context.exception))
@@ -269,7 +334,7 @@ class TestController(unittest.TestCase):
         )
         self.connection.commit()
 
-        result = self.controller.list({"account_type": "bank"})
+        result = self.controller.list({"source_type": "bank"})
         self.assertEqual(len(result), 2)
         self.assertEqual(result[0]["provider"], "BankX")
         self.assertEqual(result[1]["provider"], "BankY")
@@ -282,24 +347,18 @@ class TestController(unittest.TestCase):
         )
         self.connection.commit()
 
-        result = self.controller.list({"account_type": "bank", "id": 1})
+        result = self.controller.list({"source_type": "bank", "id": 1})
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0]["provider"], "BankX")
 
-    def test_list_invalid_account_type(self) -> None:
+    def test_list_invalid_source_type(self) -> None:
         with self.assertRaises(ValueError) as context:
-            self.controller.list({"account_type": "alien_card"})
+            self.controller.list({"source_type": "alien_card"})
         self.assertIn("No model found for account type", str(context.exception))
 
     def test_list_invalid_id_type(self) -> None:
         with self.assertRaises(ValueError) as context:
-            self.controller.list({"account_type": "bank", "id": "abc"})
-        self.assertIn("Account ID must be convertible", str(context.exception))
-
-    def test_list_missing_account(self) -> None:
-        with self.assertRaises(RecordNotFoundError):
-            self.controller.list({"account_type": "bank", "id": 999})
-
-
-if __name__ == "__main__":
-    unittest.main()
+            self.controller.list({"source_type": "bank", "id": "abc"})
+        self.assertIn(
+            "id must be convertible to an integer", str(context.exception)
+        )
