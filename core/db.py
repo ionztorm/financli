@@ -3,6 +3,7 @@ import sqlite3
 from pathlib import Path
 
 from features.payable.bill.schema import CREATE_BILLS_TABLE
+from features.transactions.schema import CREATE_TRANSACTIONS_TABLE
 from features.accounts.bank.schema import CREATE_BANKS_TABLE
 from features.accounts.store_card.schema import CREATE_STORE_CARDS_TABLE
 from features.accounts.credit_card.schema import CREATE_CREDIT_CARDS_TABLE
@@ -29,6 +30,7 @@ def get_connection() -> sqlite3.Connection:
     cursor.execute(CREATE_BILLS_TABLE)
     cursor.execute(CREATE_STORE_CARDS_TABLE)
     cursor.execute(CREATE_SUBSCRIPTIONS_TABLE)
+    cursor.execute(CREATE_TRANSACTIONS_TABLE)
     # TODO: Add remaining tables
 
     conn.commit()
