@@ -1,6 +1,6 @@
 import sqlite3
 
-from utils.types import TableName
+from utils.types import IDKeys, TableName, AccountRole, AccountTypeKeys
 from utils.constants import TYPE_CONFIG
 from utils.model_types import ModelType
 from features.payable.bill.model import Bills
@@ -50,25 +50,41 @@ class UtilityService:
             raise ValueError(f"{field_name} must be a non-empty string.")
         return value
 
-    def _get_account_type_and_id(self, data: dict) -> tuple[str, int]:
-        account_type = self._get_account_type(data)
-        account_id = self._get_id(data)
+    def _get_account_type_and_id(
+        self, data: dict, expected_role: AccountRole
+    ) -> tuple[str, int]:
+        if expected_role == AccountRole.SOURCE:
+            account_type = self._get_account_type(
+                data, AccountTypeKeys.SOURCE_TYPE
+            )
+            account_id = self._get_id(data, IDKeys.SOURCE_ID)
+        elif expected_role == AccountRole.DESTINATION:
+            account_type = self._get_account_type(
+                data, AccountTypeKeys.DESTINATION_TYPE
+            )
+            account_id = self._get_id(data, IDKeys.DESTINATION_ID)
+        else:
+            raise ValueError(f"Invalid account role: {expected_role.value}")
+
         return account_type, account_id
 
-    def _get_account_type(self, data: dict) -> str:
-        return self._require_non_empty_str(
-            data.get("account_type"), "Account type"
-        )
+    def _get_account_type(
+        self, data: dict, expected_key: AccountTypeKeys
+    ) -> str:
+        account_type = data.get(expected_key.value)
+        if not account_type:
+            raise ValueError(f"{expected_key.value} not found in the data.")
+        return self._require_non_empty_str(account_type, "Account type")
 
-    def _get_id(self, data: dict) -> int:
-        raw_id = data.get("id")
-        if raw_id is None:
-            raise ValueError("Account ID is required.")
+    def _get_id(self, data: dict, expected_key: IDKeys) -> int:
+        account_id = data.get(expected_key.value)
+        if account_id is None:
+            raise ValueError(f"{expected_key.value} not found in the data.")
         try:
-            return int(raw_id)
+            return int(account_id)
         except (ValueError, TypeError) as e:
             raise ValueError(
-                "Account ID must be convertible to an integer."
+                f"{expected_key.value} must be convertible to an integer."
             ) from e
 
     def _get_amount(self, data: dict) -> float:

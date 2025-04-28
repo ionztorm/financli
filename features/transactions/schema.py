@@ -3,12 +3,12 @@ CREATE_TRANSACTIONS_TABLE = """
         id INTEGER PRIMARY KEY,
         date TEXT NOT NULL,
         transaction_type TEXT NOT NULL,
-        from_provider TEXT NOT NULL,
-        from_type TEXT NOT NULL,
-        from_id INTEGER NOT NULL,
-        to_provider TEXT,
-        to_type TEXT,
-        to_id INTEGER,
+        source_provider TEXT NOT NULL,
+        source_type TEXT NOT NULL,
+        source_id INTEGER NOT NULL,
+        destination_provider TEXT,
+        destination_type TEXT,
+        destination_id INTEGER,
         description TEXT NOT NULL,
         amount REAL NOT NULL
     )
