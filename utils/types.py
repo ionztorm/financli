@@ -9,3 +9,10 @@ class TableName(Enum):
     BILLS = "bills"
     SUBSCRIPTIONS = "subscriptions"
     TRANSACTIONS = "transactions"
+
+
+class TransactionType(Enum):
+    WITHDRAW = "withdraw"
+    DEPOSIT = "deposit"
+    PAY_ONLY = "pay_only"
+    TRANSFER = "transfer"
