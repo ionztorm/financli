@@ -4,6 +4,7 @@ from typing import override
 
 from utils.types import TableName
 from utils.helpers import wrap_error
+from utils.constants import CURRENCY_SYMBOL
 from features.accounts.base import Accounts
 from features.accounts.exceptions import AccountHasBalanceError
 from features.accounts.credit_card.exceptions import (
@@ -49,7 +50,8 @@ class CreditCard(Accounts):
 
             if (balance - amount) < -limit:
                 raise AccountHasBalanceError(
-                    "Insufficient funds for this transaction."
+                    "Withdrawal would go over the credit limit. "
+                    f"Only {CURRENCY_SYMBOL}{limit - balance} can be withdrawn"
                 )
 
             super().withdraw(id, amount)
@@ -69,8 +71,8 @@ class CreditCard(Accounts):
             new_balance = balance + amount
             if new_balance > 0:
                 raise AccountHasBalanceError(
-                    "Deposit would overpay the account and result in positive "
-                    "balance."
+                    "Deposit would overpay the card. "
+                    f"Only {CURRENCY_SYMBOL}{balance} is due"
                 )
 
             super().deposit(id, amount)

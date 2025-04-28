@@ -4,6 +4,7 @@ from typing import override
 
 from utils.types import TableName
 from utils.helpers import wrap_error
+from utils.constants import CURRENCY_SYMBOL
 from features.accounts.base import Accounts
 from features.accounts.exceptions import AccountHasBalanceError
 from features.accounts.bank.exceptions import (
@@ -43,11 +44,13 @@ class Bank(Accounts):
         try:
             account = self.get_one(id)[0]
             balance = float(account.get("balance", 0.0))
-            limiter = float(account.get("limiter", 0.0))
+            limit = float(account.get("limiter", 0.0))
 
-            if balance + limiter < amount:
+            if balance + limit < amount:
                 raise AccountHasBalanceError(
-                    "Insufficient funds for this transaction."
+                    "Withdrawal would go below the overdraft limit. "
+                    f"Only {CURRENCY_SYMBOL}{balance + limit:.2f} "
+                    "can be withdrawn"
                 )
 
             super().withdraw(id, amount)
