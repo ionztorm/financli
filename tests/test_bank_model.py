@@ -69,7 +69,9 @@ class TestBank(unittest.TestCase):
         with self.assertRaises(BankAccountCloseError) as context:
             self.bank.close(999)
         self.assertIn("Unable to close bank account", str(context.exception))
-        self.assertIn("No record found with ID 999", str(context.exception))
+        self.assertIn(
+            "Record with ID 999 does not exis", str(context.exception)
+        )
 
     def test_withdraw_valid(self) -> None:
         self.cursor.execute(
@@ -97,7 +99,9 @@ class TestBank(unittest.TestCase):
         with self.assertRaises(BankAccountWithdrawalError) as context:
             self.bank.withdraw(999, 50.0)
         self.assertIn("Unable to complete withdrawal", str(context.exception))
-        self.assertIn("No record found with ID 999", str(context.exception))
+        self.assertIn(
+            "Record with ID 999 does not exis", str(context.exception)
+        )
 
     def test_withdraw_insufficient_funds(self) -> None:
         self.cursor.execute(
@@ -140,7 +144,9 @@ class TestBank(unittest.TestCase):
         with self.assertRaises(BankAccountDepositError) as context:
             self.bank.deposit(999, 50.0)
         self.assertIn("Unable to complete deposit", str(context.exception))
-        self.assertIn("No record found with ID 999", str(context.exception))
+        self.assertIn(
+            "Record with ID 999 does not exis", str(context.exception)
+        )
 
 
 if __name__ == "__main__":

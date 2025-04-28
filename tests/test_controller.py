@@ -3,6 +3,7 @@ import unittest
 
 from core.controller import Controller, TransactionError
 from core.exceptions import RecordNotFoundError
+from features.transactions.schema import CREATE_TRANSACTIONS_TABLE
 from features.accounts.bank.schema import CREATE_BANKS_TABLE
 from features.accounts.bank.exceptions import (
     BankAccountOpenError,
@@ -17,6 +18,7 @@ class TestController(unittest.TestCase):
         self.connection = sqlite3.connect(":memory:")
         self.cursor = self.connection.cursor()
         self.cursor.execute(CREATE_BANKS_TABLE)
+        self.cursor.execute(CREATE_TRANSACTIONS_TABLE)
         self.connection.commit()
         self.controller = Controller(self.connection)
 
@@ -166,7 +168,9 @@ class TestController(unittest.TestCase):
                     "amount": 20.0,
                 }
             )
-        self.assertIn("No record found with ID 999", str(context.exception))
+        self.assertIn(
+            "Record with ID 999 does not exist", str(context.exception)
+        )
 
     def test_deposit_with_string_id_and_amount(self) -> None:
         self.cursor.execute(

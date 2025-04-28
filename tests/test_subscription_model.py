@@ -63,7 +63,9 @@ class TestSubscriptions(unittest.TestCase):
         with self.assertRaises(SubscriptionTerminationError) as context:
             self.subscriptions.close(999)
         self.assertIn("Unable to remove subscription", str(context.exception))
-        self.assertIn("No record found with ID 999", str(context.exception))
+        self.assertIn(
+            "Record with ID 999 does not exist", str(context.exception)
+        )
 
 
 if __name__ == "__main__":

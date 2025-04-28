@@ -64,7 +64,9 @@ class TestBills(unittest.TestCase):
         with self.assertRaises(BillProviderCloseError) as context:
             self.bills.close(999)
         self.assertIn("Unable to remove provider", str(context.exception))
-        self.assertIn("No record found with ID 999", str(context.exception))
+        self.assertIn(
+            "Record with ID 999 does not exist", str(context.exception)
+        )
 
 
 if __name__ == "__main__":
