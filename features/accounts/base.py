@@ -26,7 +26,7 @@ class Accounts(Table):
         try:
             self._create(data)
         except ValidationError as e:
-            wrapper = wrap_error(AccountOpenError, "Could not open account")
+            wrapper = wrap_error(AccountOpenError, "Account creation failed")
             raise wrapper(e) from e
         except QueryExecutionError as e:
             wrapper = wrap_error(AccountOpenError, "Account creation failed")
@@ -36,19 +36,21 @@ class Accounts(Table):
         try:
             self.get_one(id)
         except RecordNotFoundError as e:
-            wrapper = wrap_error(AccountNotFoundError, "Cannot close account")
+            wrapper = wrap_error(
+                AccountNotFoundError, "Could not find account to close"
+            )
             raise wrapper(e) from e
 
         try:
             self._delete(id)
         except RecordNotFoundError as e:
             wrapper = wrap_error(
-                AccountNotFoundError, "Account missing during deletion"
+                AccountNotFoundError, "Could not find account to close"
             )
             raise wrapper(e) from e
         except QueryExecutionError as e:
             wrapper = wrap_error(
-                AccountDeletionError, "Could not delete account"
+                AccountDeletionError, "Could not close account"
             )
             raise wrapper(e) from e
 
@@ -58,7 +60,7 @@ class Accounts(Table):
             balance = float(account.get("balance", 0.0))
         except RecordNotFoundError as e:
             wrapper = wrap_error(
-                AccountNotFoundError, "Cannot perform transaction"
+                AccountNotFoundError, "Could not find account for withdrawal"
             )
             raise wrapper(e) from e
 
@@ -69,7 +71,7 @@ class Accounts(Table):
         except QueryExecutionError as e:
             wrapper = wrap_error(
                 AccountWithdrawalError,
-                "Failed to update balance.",
+                "Failed to update balance",
             )
             raise wrapper(e) from e
 
@@ -80,7 +82,7 @@ class Accounts(Table):
             balance = float(balance_str) if balance_str is not None else 0.0
         except RecordNotFoundError as e:
             wrapper = wrap_error(
-                AccountNotFoundError, "Cannot perform transaction"
+                AccountNotFoundError, "Could not find account for deposit"
             )
             raise wrapper(e) from e
 
@@ -91,6 +93,6 @@ class Accounts(Table):
         except QueryExecutionError as e:
             wrapper = wrap_error(
                 AccountWithdrawalError,
-                "Failed to update balance or log transaction",
+                "Failed to update balance",
             )
             raise wrapper(e) from e
