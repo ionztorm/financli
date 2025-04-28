@@ -38,3 +38,10 @@ TYPE_CONFIG = {
         "is_pay_only": True,
     },
 }
+
+TRANSACTION_TYPES = {
+    "withdraw",
+    "deposit",
+    "pay_only",
+    "transfer_to_account",
+}
