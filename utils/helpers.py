@@ -1,8 +1,10 @@
 import json
 
-from typing import Callable, NoReturn
+from typing import Callable
 from pathlib import Path
 from functools import wraps
+
+from tabulate import tabulate
 
 CONFIG_DIR = Path.home() / ".config" / "budget_cli"
 SETTINGS_PATH = CONFIG_DIR / "settings.json"
@@ -21,6 +23,45 @@ def pretty_output(func: Callable[..., None]) -> Callable[..., None]:
 @pretty_output
 def msg(message: str) -> None:
     print(message)
+
+
+def print_table(data: list[dict]) -> None:
+    """
+    Print a list of dictionaries as a formatted table with spacing.
+
+    Args:
+        data (list of dict): The rows to display.
+    """
+    if not data:
+        return
+
+    currency = load_or_create_settings().get("currency_symbol", "£")
+
+    currency_fields = [
+        "credit_limit",
+        "balance",
+        "interest_rate",
+        "bill_amount",
+        "pay_amount",
+        "amount",
+    ]
+    formatted_data = format_currency_fields(
+        data, currency_fields, symbol=currency
+    )
+
+    print()
+    print(tabulate(formatted_data, headers="keys", tablefmt="github"))
+    print()
+
+
+def format_currency_fields(
+    data: list[dict], fields: list[str], symbol: str = "£"
+) -> list[dict]:
+    for row in data:
+        for field in fields:
+            if field in row and isinstance(row[field], (int, float)):
+                row[field] = f"{symbol}{row[field]:,.2f}"
+    return data
 
 
 def wrap_error(

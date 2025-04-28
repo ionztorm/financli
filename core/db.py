@@ -31,7 +31,7 @@ def get_connection() -> sqlite3.Connection:
     cursor.execute(CREATE_STORE_CARDS_TABLE)
     cursor.execute(CREATE_SUBSCRIPTIONS_TABLE)
     cursor.execute(CREATE_TRANSACTIONS_TABLE)
-    # TODO: Add remaining tables
+    # TODO: Add loans table
 
     conn.commit()
     return conn

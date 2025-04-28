@@ -1,4 +1,10 @@
 from utils.types import TableName
+from utils.helpers import load_or_create_settings
+
+CURRENCY_SYMBOL = currency = load_or_create_settings().get(
+    "currency_symbol", "£"
+)
+
 
 TYPE_CONFIG = {
     TableName.BANKS: {
