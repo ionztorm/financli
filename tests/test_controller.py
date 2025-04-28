@@ -5,6 +5,7 @@ from datetime import datetime
 
 from core.controller import Controller, TransactionError
 from core.exceptions import RecordNotFoundError
+from utils.constants import CURRENCY_SYMBOL
 from features.transactions.schema import CREATE_TRANSACTIONS_TABLE
 from features.accounts.bank.schema import CREATE_BANKS_TABLE
 from features.accounts.bank.exceptions import (
@@ -38,7 +39,7 @@ class TestController(unittest.TestCase):
             "limiter": "100.0",
             "is_source": "1",
             "is_destination": "1",
-            "destination_provider": "BankX",  # Added destination_provider
+            "destination_provider": "BankX",
         }
         self.controller.open(data)
         result = self.controller.utility.bank_model.get_one(1)
@@ -148,7 +149,11 @@ class TestController(unittest.TestCase):
                 }
             )
         self.assertIn("Unable to complete withdrawal", str(context.exception))
-        self.assertIn("Insufficient funds", str(context.exception))
+        self.assertIn(
+            "Withdrawal would go below the overdraft limit. "
+            f"Only {CURRENCY_SYMBOL}60.00 can be withdrawn",
+            str(context.exception),
+        )
 
     def test_withdraw_nonexistent_account(self) -> None:
         with self.assertRaises(BankAccountWithdrawalError):
