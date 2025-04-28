@@ -3,10 +3,7 @@ import sqlite3
 from utils.helpers import wrap_error
 from core.utility_service import UtilityService
 from core.transaction_service import TransactionService
-
-
-class TransactionError(Exception):
-    pass
+from features.transactions.exceptions import TransactionError
 
 
 class Controller:
