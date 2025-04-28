@@ -1,5 +1,6 @@
 import sqlite3
 
+from utils.types import TransactionType
 from utils.helpers import wrap_error
 from core.utility_service import UtilityService
 from core.transaction_service import TransactionService
@@ -44,22 +45,60 @@ class Controller:
 
     def transaction(self, data: dict) -> None:
         try:
-            self.transactions.withdraw(
-                {
-                    "id": data.get("source_id"),
-                    "account_type": data.get("source_account_type"),
-                    "amount": data.get("amount"),
-                }
+            transaction_type_str = self.utility._require_non_empty_str(
+                data.get("transaction_type"), "transaction_type"
             )
 
-            if data.get("destination_account_type"):
-                self.transactions.deposit(
-                    {
-                        "id": data.get("destination_id"),
-                        "account_type": data.get("destination_account_type"),
-                        "amount": data.get("amount"),
-                    }
-                )
+            try:
+                transaction_type = TransactionType[transaction_type_str.upper()]
+            except KeyError as e:
+                raise ValueError(
+                    f"Invalid transaction type: {transaction_type_str}"
+                ) from e
+
+            match transaction_type:
+                case TransactionType.WITHDRAW | TransactionType.PAY_ONLY:
+                    self.transactions.withdraw(
+                        {
+                            "id": data.get("source_id"),
+                            "account_type": data.get("source_account_type"),
+                            "amount": data.get("amount"),
+                        }
+                    )
+
+                case TransactionType.DEPOSIT:
+                    self.transactions.deposit(
+                        {
+                            "id": data.get("destination_id"),
+                            "account_type": data.get(
+                                "destination_account_type"
+                            ),
+                            "amount": data.get("amount"),
+                        }
+                    )
+
+                case TransactionType.TRANSFER:
+                    self.transactions.withdraw(
+                        {
+                            "id": data.get("source_id"),
+                            "account_type": data.get("source_account_type"),
+                            "amount": data.get("amount"),
+                        }
+                    )
+                    self.transactions.deposit(
+                        {
+                            "id": data.get("destination_id"),
+                            "account_type": data.get(
+                                "destination_account_type"
+                            ),
+                            "amount": data.get("amount"),
+                        }
+                    )
+
+                case _:
+                    raise ValueError(
+                        f"Invalid transaction type: {transaction_type_str}"
+                    )
 
         except Exception as e:
             raise wrap_error(TransactionError, "Transaction failed")(e) from e
