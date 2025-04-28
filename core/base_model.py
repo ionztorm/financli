@@ -35,7 +35,7 @@ class Table:
             )
             row = self._cursor.fetchone()
             if not row:
-                raise RecordNotFoundError(f"No record found with ID {id}.")
+                raise RecordNotFoundError(f"Record with ID {id} does not exist")
             return [self._row_to_dict(row)]
         except sqlite3.Error as e:
             wrapper = wrap_error(QueryExecutionError, "Failed to fetch record")
@@ -76,20 +76,18 @@ class Table:
             )
             return self._cursor.fetchone() is not None
         except sqlite3.Error as e:
-            wrapper = wrap_error(
-                QueryExecutionError, "Failed to check record existence"
-            )
+            wrapper = wrap_error(QueryExecutionError, "Failed to lookup record")
             raise wrapper(e) from e
 
     def _update(self, id: int, data: dict[str, str]) -> None:
         if not self.exists(id):
-            raise RecordNotFoundError(f"Record with ID {id} does not exist.")
+            raise RecordNotFoundError(f"Record with ID {id} does not exist")
 
         update_columns = [
             col for col in data.keys() if col in self.table_columns
         ]
         if not update_columns:
-            raise ValidationError("No valid fields to update.")
+            raise ValidationError("Provided fields do not match database")
 
         current = self.get_one(id)
 
@@ -111,9 +109,7 @@ class Table:
 
     def _delete(self, id: int) -> None:
         if not self.exists(id):
-            raise RecordNotFoundError(
-                f"Cannot delete: record with ID {id} does not exist."
-            )
+            raise RecordNotFoundError(f"Record with ID {id} does not exist")
 
         query = f"DELETE FROM {self._table_name.value} WHERE id = ?"  # noqa: S608
         try:
