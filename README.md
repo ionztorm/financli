@@ -97,6 +97,7 @@ financli/
 │   ├── exceptions.py               # Shared error types
 │   ├── main.py                     # Entry point for core logic
 │   └── utility_service.py          # Provides utility functions for the controller
+│   └── transaction_service.py      # Provides transaction functions for the controller
 │
 ├── features/
 │   ├── accounts/
@@ -182,9 +183,9 @@ financli/
 
 #### 💰 Loans
 
-- [ ] Open account
-- [ ] Close account
-- [ ] Deposit
+- [x] Open account
+- [x] Close account
+- [x] Deposit
 
 #### 🧾 Bills
 
@@ -197,6 +198,12 @@ financli/
 - [x] Open account
 - [x] Close account
 - ✅ All tests passing
+
+### Transactions
+
+- [x] Log transaction
+- [ ] Edit transaction
+- [ ] Delete transaction
 
 ---
 
