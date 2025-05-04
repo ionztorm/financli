@@ -17,7 +17,7 @@ from features.accounts.store_card.exceptions import (
 
 class StoreCard(Accounts):
     def __init__(self, connection: sqlite3.Connection) -> None:
-        super().__init__(connection, TableName.BANKS)
+        super().__init__(connection, TableName.STORECARDS)
 
     @override
     def open(self, data: dict) -> None:

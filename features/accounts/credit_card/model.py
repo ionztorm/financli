@@ -17,7 +17,7 @@ from features.accounts.credit_card.exceptions import (
 
 class CreditCard(Accounts):
     def __init__(self, connection: sqlite3.Connection) -> None:
-        super().__init__(connection, TableName.BANKS)
+        super().__init__(connection, TableName.CREDITCARDS)
 
     @override
     def open(self, data: dict) -> None:
