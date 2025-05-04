@@ -16,7 +16,7 @@ class Controller:
 
     def list(self, data: dict) -> list[dict]:
         account_type = self.utility._get_account_type(
-            data, AccountTypeKeys.SOURCE_TYPE
+            data, AccountTypeKeys.DEFAULT
         )
         model = self.utility._get_model(account_type)
 
