@@ -25,6 +25,7 @@ def msg(message: str) -> None:
     print(message)
 
 
+@pretty_output
 def print_table(data: list[dict]) -> None:
     """
     Print a list of dictionaries as a formatted table with spacing.
@@ -37,21 +38,12 @@ def print_table(data: list[dict]) -> None:
 
     currency = load_or_create_settings().get("currency_symbol", "£")
 
-    currency_fields = [
-        "credit_limit",
-        "balance",
-        "interest_rate",
-        "bill_amount",
-        "pay_amount",
-        "amount",
-    ]
+    currency_fields = ["limiter", "balance", "amount", "monthly_charge"]
     formatted_data = format_currency_fields(
         data, currency_fields, symbol=currency
     )
 
-    print()
     print(tabulate(formatted_data, headers="keys", tablefmt="github"))
-    print()
 
 
 def format_currency_fields(
