@@ -30,6 +30,10 @@ class UtilityService:
             TYPE_CONFIG[TableName.STORECARDS][
                 "display_name"
             ]: self.store_card_model,
+            TYPE_CONFIG[TableName.SUBSCRIPTIONS][
+                "display_name"
+            ]: self.subscription_model,
+            TYPE_CONFIG[TableName.BILLS]["display_name"]: self.bill_model,
         }
 
     def _get_valid_account_types(self) -> dict:
