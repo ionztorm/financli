@@ -1,18 +1,19 @@
 import argparse
 
 from InquirerPy import inquirer
+from InquirerPy.validator import EmptyInputValidator
 
 from core.db import get_connection
 from utils.helpers import print_table
 from core.controller import Controller
 
 REQUIRED_FIELDS = {
-    "bank": {"provider", "balance", "alias", "limiter"},
-    "credit card": {"provider", "balance", "limiter"},
-    "store card": {"provider", "balance", "limiter"},
-    "loan": {"provider", "balance"},
-    "subscription": {"provider", "monthly_charge"},
-    "bill": {"provider", "monthly_charge"},
+    "bank": ["provider", "balance", "alias", "limiter"],
+    "credit card": ["provider", "balance", "limiter"],
+    "store card": ["provider", "balance", "limiter"],
+    "loan": ["provider", "balance"],
+    "subscription": ["provider", "monthly_charge"],
+    "bill": ["provider", "monthly_charge"],
 }
 
 
@@ -73,7 +74,7 @@ def handle_open(args: argparse.Namespace) -> None:
             choices=list(REQUIRED_FIELDS.keys()),
         ).execute()
 
-    required_fields = REQUIRED_FIELDS.get(account_type, set())
+    required_fields = REQUIRED_FIELDS.get(account_type, [])
 
     data = {"account_type": account_type}
     for field in required_fields:
@@ -82,7 +83,8 @@ def handle_open(args: argparse.Namespace) -> None:
             data[field] = cli_value
         else:
             data[field] = inquirer.text(
-                message=f"Enter {field.replace('_', ' ')}:"
+                message=f"Enter {field.replace('_', ' ')}:",
+                validate=EmptyInputValidator(),
             ).execute()
 
     conn = get_connection()
