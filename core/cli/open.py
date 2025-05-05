@@ -6,14 +6,20 @@ from InquirerPy.validator import EmptyInputValidator
 from core.db import get_connection
 from utils.helpers import print_table
 from core.controller import Controller
+from core.utils.validator import TYPE_VALIDATORS
 
 REQUIRED_FIELDS = {
-    "bank": ["provider", "balance", "alias", "limiter"],
-    "credit card": ["provider", "balance", "limiter"],
-    "store card": ["provider", "balance", "limiter"],
-    "loan": ["provider", "balance"],
-    "subscription": ["provider", "monthly_charge"],
-    "bill": ["provider", "monthly_charge"],
+    "bank": [
+        ("provider", str),
+        ("balance", float),
+        ("alias", str),
+        ("limiter", float),
+    ],
+    "credit card": [("provider", str), ("balance", float), ("limiter", float)],
+    "store card": [("provider", str), ("balance", float), ("limiter", float)],
+    "loan": [("provider", str), ("balance", float)],
+    "subscription": [("provider", str), ("monthly_charge", float)],
+    "bill": [("provider", str), ("monthly_charge", float)],
 }
 
 
@@ -75,21 +81,31 @@ def handle_open(args: argparse.Namespace) -> None:
         ).execute()
 
     required_fields = REQUIRED_FIELDS.get(account_type, [])
-
     data = {"account_type": account_type}
-    for field in required_fields:
+
+    for field, field_type in required_fields:
         cli_value = getattr(args, field, None)
+
         if cli_value is not None:
-            data[field] = cli_value
+            try:
+                data[field] = field_type(cli_value)
+            except ValueError:
+                print(
+                    f"Invalid value for {field}. Expected {field_type.__name__}."
+                )
+                return
         else:
-            data[field] = inquirer.text(
+            validator = TYPE_VALIDATORS.get(field_type, EmptyInputValidator())
+
+            user_input = inquirer.text(
                 message=f"Enter {field.replace('_', ' ')}:",
-                validate=EmptyInputValidator(),
+                validate=validator,
             ).execute()
+
+            data[field] = field_type(user_input)
 
     conn = get_connection()
     model = Controller(conn)
-
     model.open(data)
     updated_list = model.list({"account_type": account_type})
 
