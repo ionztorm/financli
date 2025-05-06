@@ -91,7 +91,8 @@ def handle_open(args: argparse.Namespace) -> None:
                 data[field] = field_type(cli_value)
             except ValueError:
                 print(
-                    f"Invalid value for {field}. Expected {field_type.__name__}."
+                    f"Invalid value for {field}. "
+                    f"Expected {field_type.__name__}."
                 )
                 return
         else:
