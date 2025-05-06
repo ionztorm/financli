@@ -43,4 +43,13 @@ TYPE_CONFIG = {
         "display_name": "subscription",
         "is_pay_only": True,
     },
+    TableName.TRANSACTIONS: {
+        "is_source": False,
+        "is_destination": False,
+        "display_name": "transaction",
+        "is_pay_only": False,
+    },
 }
+
+TRANSACTION_TYPES = ["withdraw", "deposit", "pay another account", "payment"]
+ACCOUNT_TYPES = ["bank", "credit card", "store card", "bill", "subscription"]
