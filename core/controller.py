@@ -4,6 +4,7 @@ from utils.types import IDKeys, AccountTypeKeys, TransactionType
 from utils.helpers import wrap_error
 from core.utility_service import UtilityService
 from core.transaction_service import TransactionService
+from features.transactions.model import Transaction
 from features.transactions.exceptions import TransactionError
 
 
@@ -30,7 +31,8 @@ class Controller:
             data, AccountTypeKeys.DEFAULT
         )
         model = self.utility._get_model(account_type)
-        model.open(data)
+        if not isinstance(model, Transaction):
+            model.open(data)
 
     def close(self, account_type: str, id: int) -> None:
         account_type = self.utility._require_non_empty_str(
@@ -45,7 +47,8 @@ class Controller:
             )
 
         model = self.utility._get_model(account_type)
-        model.close(_id)
+        if not isinstance(model, Transaction):
+            model.close(_id)
 
     def transaction(self, data: dict) -> None:
         try:
