@@ -21,7 +21,7 @@ class TestStoreCard(unittest.TestCase):
         self.card = StoreCard(self.connection)
 
     def tearDown(self) -> None:
-        self.cursor.execute("DROP TABLE IF EXISTS banks")
+        self.cursor.execute("DROP TABLE IF EXISTS store_cards")
         self.connection.commit()
         self.connection.close()
 
@@ -42,7 +42,8 @@ class TestStoreCard(unittest.TestCase):
 
     def test_close_account_valid(self) -> None:
         self.cursor.execute(
-            "INSERT INTO banks (provider, balance, limiter) VALUES (?, ?, ?)",
+            "INSERT INTO store_cards (provider, balance, limiter) "
+            "VALUES (?, ?, ?)",
             ("Target", 0.0, 300.0),
         )
         self.connection.commit()
@@ -56,7 +57,8 @@ class TestStoreCard(unittest.TestCase):
 
     def test_withdraw_valid(self) -> None:
         self.cursor.execute(
-            "INSERT INTO banks (provider, balance, limiter) VALUES (?, ?, ?)",
+            "INSERT INTO store_cards (provider, balance, limiter) "
+            "VALUES (?, ?, ?)",
             ("Target", -50.0, 300.0),
         )
         self.connection.commit()
@@ -70,7 +72,8 @@ class TestStoreCard(unittest.TestCase):
 
     def test_withdraw_insufficient_funds(self) -> None:
         self.cursor.execute(
-            "INSERT INTO banks (provider, balance, limiter) VALUES (?, ?, ?)",
+            "INSERT INTO store_cards (provider, balance, limiter) "
+            "VALUES (?, ?, ?)",
             ("Target", 0.0, 100.0),
         )
         self.connection.commit()
@@ -79,7 +82,8 @@ class TestStoreCard(unittest.TestCase):
 
     def test_deposit_valid(self) -> None:
         self.cursor.execute(
-            "INSERT INTO banks (provider, balance, limiter) VALUES (?, ?, ?)",
+            "INSERT INTO store_cards (provider, balance, limiter) "
+            "VALUES (?, ?, ?)",
             ("Target", -100.0, 300.0),
         )
         self.connection.commit()
@@ -93,7 +97,8 @@ class TestStoreCard(unittest.TestCase):
 
     def test_deposit_exceeds_balance_limit(self) -> None:
         self.cursor.execute(
-            "INSERT INTO banks (provider, balance, limiter) VALUES (?, ?, ?)",
+            "INSERT INTO store_cards (provider, balance, limiter) "
+            "VALUES (?, ?, ?)",
             ("Target", -50.0, 300.0),
         )
         self.connection.commit()

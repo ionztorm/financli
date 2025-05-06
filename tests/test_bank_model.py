@@ -2,6 +2,7 @@ import sqlite3
 import unittest
 
 from core.exceptions import RecordNotFoundError
+from features.accounts.exceptions import AccountHasBalanceError
 from utils.constants import CURRENCY_SYMBOL
 from features.accounts.bank.model import Bank
 from features.accounts.bank.schema import CREATE_BANKS_TABLE
@@ -59,12 +60,22 @@ class TestBank(unittest.TestCase):
         self.cursor.execute(
             "INSERT INTO banks (provider, alias, balance, limiter) "
             "VALUES (?, ?, ?, ?)",
-            ("BankA", "Savings", 100.0, 50.0),
+            ("BankA", "Savings", 0.0, 50.0),
         )
         self.connection.commit()
         self.bank.close(1)
         with self.assertRaises(RecordNotFoundError):
             self.bank.get_one(1)
+
+    def test_close_account_with_balance(self) -> None:
+        self.cursor.execute(
+            "INSERT INTO banks (provider, alias, balance, limiter) "
+            "VALUES (?, ?, ?, ?)",
+            ("BankA", "Savings", 10.0, 50.0),
+        )
+        self.connection.commit()
+        with self.assertRaises(BankAccountCloseError):
+            self.bank.close(1)
 
     def test_close_account_not_found(self) -> None:
         with self.assertRaises(BankAccountCloseError) as context:
