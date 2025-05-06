@@ -20,7 +20,9 @@ class Bills(PayOnly):
         try:
             super().open(data)
         except Exception as e:
-            wrapper = wrap_error(BillProviderCreationError, "Unable to create provider")
+            wrapper = wrap_error(
+                BillProviderCreationError, "Unable to create provider"
+            )
             raise wrapper(e) from e
 
     @override
@@ -28,5 +30,7 @@ class Bills(PayOnly):
         try:
             super().close(id)
         except Exception as e:
-            wrapper = wrap_error(BillProviderCloseError, "Unable to remove provider")
+            wrapper = wrap_error(
+                BillProviderCloseError, "Unable to remove provider"
+            )
             raise wrapper(e) from e

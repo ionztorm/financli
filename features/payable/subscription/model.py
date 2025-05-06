@@ -20,7 +20,9 @@ class Subscriptions(PayOnly):
         try:
             super().open(data)
         except Exception as e:
-            wrapper = wrap_error(SubscriptionCreationError, "Unable to create subscription")
+            wrapper = wrap_error(
+                SubscriptionCreationError, "Unable to create subscription"
+            )
             raise wrapper(e) from e
 
     @override
@@ -28,5 +30,7 @@ class Subscriptions(PayOnly):
         try:
             super().close(id)
         except Exception as e:
-            wrapper = wrap_error(SubscriptionTerminationError, "Unable to remove subscription")
+            wrapper = wrap_error(
+                SubscriptionTerminationError, "Unable to remove subscription"
+            )
             raise wrapper(e) from e
