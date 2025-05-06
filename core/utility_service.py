@@ -4,6 +4,7 @@ from utils.types import IDKeys, TableName, AccountRole, AccountTypeKeys
 from utils.constants import TYPE_CONFIG
 from utils.model_types import ModelType
 from features.payable.bill.model import Bills
+from features.transactions.model import Transaction
 from features.accounts.bank.model import Bank
 from features.accounts.store_card.model import StoreCard
 from features.accounts.credit_card.model import CreditCard
@@ -17,6 +18,7 @@ class UtilityService:
         self.store_card_model = StoreCard(db_connection)
         self.bill_model = Bills(db_connection)
         self.subscription_model = Subscriptions(db_connection)
+        self.transaction_model = Transaction(db_connection)
 
         self.valid_account_types = self._get_valid_account_types()
         self.source_types = self.valid_account_types["source_types"]
@@ -34,6 +36,9 @@ class UtilityService:
                 "display_name"
             ]: self.subscription_model,
             TYPE_CONFIG[TableName.BILLS]["display_name"]: self.bill_model,
+            TYPE_CONFIG[TableName.TRANSACTIONS][
+                "display_name"
+            ]: self.transaction_model,
         }
 
     def _get_valid_account_types(self) -> dict:
