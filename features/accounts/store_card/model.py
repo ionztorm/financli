@@ -33,6 +33,22 @@ class StoreCard(Accounts):
     @override
     def close(self, id: int) -> None:
         try:
+            account = self.get_one(id)[0]
+            balance = float(account.get("balance", 0.0))
+            if balance != 0.0:
+                raise AccountHasBalanceError(
+                    "This account has a balance of "
+                    f"{CURRENCY_SYMBOL}{balance:.2f}. "
+                    "Please recfity this with a transaction."
+                )
+        except Exception as e:
+            wrapper = wrap_error(
+                StoreCardAccountCloseError,
+                "Unable to close store card account. ",
+            )
+            raise wrapper(e) from e
+
+        try:
             super().close(id)
         except Exception as e:
             wrapper = wrap_error(
