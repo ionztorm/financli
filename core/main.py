@@ -3,6 +3,7 @@ import argparse
 from core.db import create_data_path
 from core.cli.open import register_open_command
 from utils.helpers import load_or_create_settings
+from core.cli.close import register_close_command
 
 
 def main() -> None:
@@ -19,6 +20,7 @@ def main() -> None:
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     register_open_command(subparsers)
+    register_close_command(subparsers)
 
     args = parser.parse_args()
 
