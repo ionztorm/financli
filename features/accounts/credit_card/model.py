@@ -21,11 +21,13 @@ class CreditCard(Accounts):
 
     @override
     def open(self, data: dict) -> None:
-        balance = data.get("balance") or 0.0
-        limiter = data.get("limiter") or 0.0
+        balance = data.get("balance")
+        limiter = data.get("limiter")
 
-        data["balance"] = -balance
-        data["limiter"] = -limiter
+        if balance is not None:
+            data["balance"] = -float(balance)
+        if limiter is not None:
+            data["limiter"] = -float(limiter)
 
         try:
             super().open(data)
