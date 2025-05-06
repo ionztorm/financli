@@ -4,7 +4,7 @@ from InquirerPy import inquirer
 from InquirerPy.validator import EmptyInputValidator
 
 from core.db import get_connection
-from utils.helpers import print_table
+from utils.helpers import msg, print_table
 from core.controller import Controller
 from core.utils.validator import TYPE_VALIDATORS
 
@@ -90,7 +90,7 @@ def handle_open(args: argparse.Namespace) -> None:
             try:
                 data[field] = field_type(cli_value)
             except ValueError:
-                print(
+                msg(
                     f"Invalid value for {field}. "
                     f"Expected {field_type.__name__}."
                 )
@@ -111,10 +111,10 @@ def handle_open(args: argparse.Namespace) -> None:
     try:
         model.open(data)
     except Exception as e:
-        print(f"{e}\n")
+        msg(f"{e}")
         return
 
     updated_list = model.list({"account_type": account_type})
 
-    print(f"\n{data['provider']} created.")
+    msg(f"{data['provider']} created.")
     print_table(updated_list)

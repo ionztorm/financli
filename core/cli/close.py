@@ -4,7 +4,7 @@ from InquirerPy import inquirer
 from InquirerPy.validator import EmptyInputValidator
 
 from core.db import get_connection
-from utils.helpers import print_table
+from utils.helpers import msg, print_table
 from core.controller import Controller
 from core.utils.validator import TYPE_VALIDATORS
 
@@ -38,9 +38,12 @@ def handle_close(args: argparse.Namespace) -> None:
             choices=list(ACCOUNT_TYPES),
         ).execute()
 
-    print(f"\nCurrent {account_type} accounts:")
-
     accounts = model.list({"account_type": account_type})
+
+    if not accounts:
+        msg(f"You do not currently have any {account_type} accounts.")
+        return
+
     print_table(accounts)
 
     validator = TYPE_VALIDATORS.get(int, EmptyInputValidator())
@@ -55,11 +58,14 @@ def handle_close(args: argparse.Namespace) -> None:
     try:
         model.close(account_type, id)
     except Exception as e:
-        print(f"{e}\n")
+        msg(f"{e}")
         return
 
-    print(
-        "\nThe account was successfully closed. "
-        f"Your remaining {account_type} accounts are: "
-    )
-    print_table(model.list({"account_type": account_type}))
+    updated_accounts = model.list({"account_type": account_type})
+
+    if not updated_accounts:
+        return
+
+    msg("The account was successfully closed. ")
+
+    print_table(updated_accounts)
