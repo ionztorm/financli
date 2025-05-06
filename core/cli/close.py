@@ -52,7 +52,12 @@ def handle_close(args: argparse.Namespace) -> None:
             validate=validator,
         ).execute()
 
-    model.close(account_type, id)
+    try:
+        model.close(account_type, id)
+    except Exception as e:
+        print(f"{e}\n")
+        return
+
     print(
         "\nThe account was successfully closed. "
         f"Your remaining {account_type} accounts are: "

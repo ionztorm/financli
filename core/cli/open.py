@@ -107,7 +107,13 @@ def handle_open(args: argparse.Namespace) -> None:
 
     conn = get_connection()
     model = Controller(conn)
-    model.open(data)
+
+    try:
+        model.open(data)
+    except Exception as e:
+        print(f"{e}\n")
+        return
+
     updated_list = model.list({"account_type": account_type})
 
     print(f"\n{data['provider']} created.")
