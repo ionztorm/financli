@@ -61,11 +61,11 @@ def handle_close(args: argparse.Namespace) -> None:
         msg(f"{e}")
         return
 
+    msg("The account was successfully closed. ")
+
     updated_accounts = model.list({"account_type": account_type})
 
     if not updated_accounts:
         return
-
-    msg("The account was successfully closed. ")
 
     print_table(updated_accounts)
