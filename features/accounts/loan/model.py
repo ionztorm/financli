@@ -20,6 +20,8 @@ class Loan(Accounts):
 
     @override
     def open(self, data: dict) -> None:
+        balance = data.get("balance") or 0.0
+        data["balance"] = -balance
         try:
             super().open(data)
         except Exception as e:
