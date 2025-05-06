@@ -43,6 +43,7 @@ def print_table(data: list[dict]) -> None:
         data, currency_fields, symbol=currency
     )
 
+    print("Your accounts: ")
     print(tabulate(formatted_data, headers="keys", tablefmt="github"))
 
 
