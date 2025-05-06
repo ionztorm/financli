@@ -21,6 +21,12 @@ class StoreCard(Accounts):
 
     @override
     def open(self, data: dict) -> None:
+        balance = data.get("balance") or 0.0
+        limiter = data.get("limiter") or 0.0
+
+        data["balance"] = -balance
+        data["limiter"] = -limiter
+
         try:
             super().open(data)
         except Exception as e:
