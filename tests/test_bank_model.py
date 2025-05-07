@@ -2,13 +2,13 @@ import sqlite3
 import unittest
 
 from core.exceptions import RecordNotFoundError
-from features.accounts.exceptions import AccountHasBalanceError
 from utils.constants import CURRENCY_SYMBOL
 from features.accounts.bank.model import Bank
 from features.accounts.bank.schema import CREATE_BANKS_TABLE
 from features.accounts.bank.exceptions import (
     BankAccountOpenError,
     BankAccountCloseError,
+    BankAccountUpdateError,
     BankAccountDepositError,
     BankAccountWithdrawalError,
 )
@@ -161,6 +161,40 @@ class TestBank(unittest.TestCase):
         with self.assertRaises(BankAccountDepositError) as context:
             self.bank.deposit(999, 50.0)
         self.assertIn("Unable to complete deposit", str(context.exception))
+        self.assertIn(
+            "Record with ID 999 does not exist", str(context.exception)
+        )
+
+    def test_update_account_valid(self) -> None:
+        self.cursor.execute(
+            "INSERT INTO banks (provider, alias, balance, limiter) "
+            "VALUES (?, ?, ?, ?)",
+            ("BankA", "OldAlias", 100.0, 50.0),
+        )
+        self.connection.commit()
+
+        update_data = {"alias": "NewAlias", "limiter": "75.0"}
+        self.bank.update(1, update_data)
+
+        result = self.bank.get_one(1)
+        self.assertEqual(
+            result,
+            [
+                {
+                    "id": 1,
+                    "provider": "BankA",
+                    "alias": "NewAlias",
+                    "balance": 100.0,
+                    "limiter": 75.0,
+                }
+            ],
+        )
+
+    def test_update_account_not_found(self) -> None:
+        update_data = {"alias": "UpdatedAlias"}
+        with self.assertRaises(BankAccountUpdateError) as context:
+            self.bank.update(999, update_data)
+        self.assertIn("Unable to update bank account", str(context.exception))
         self.assertIn(
             "Record with ID 999 does not exist", str(context.exception)
         )
