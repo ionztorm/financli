@@ -7,6 +7,7 @@ from features.accounts.store_card.schema import CREATE_STORE_CARDS_TABLE
 from features.accounts.store_card.exceptions import (
     StoreCardAccountOpenError,
     StoreCardAccountCloseError,
+    StoreCardAccountUpdateError,
     StoreCardAccountDepositError,
     StoreCardAccountWithdrawalError,
 )
@@ -104,6 +105,33 @@ class TestStoreCard(unittest.TestCase):
         self.connection.commit()
         with self.assertRaises(StoreCardAccountDepositError):
             self.card.deposit(1, 100.0)
+
+    def test_update_store_card_account_valid(self) -> None:
+        self.cursor.execute(
+            "INSERT INTO store_cards (provider, balance, limiter) "
+            "VALUES (?, ?, ?)",
+            ("Target", -100.0, -300.0),
+        )
+        self.connection.commit()
+
+        update_data = {"provider": "Walmart", "limiter": "-500.0"}
+        self.card.update(1, update_data)
+
+        result = self.card.get_one(1)
+        self.assertEqual(result[0]["provider"], "Walmart")
+        self.assertEqual(result[0]["limiter"], -500.0)
+        self.assertEqual(result[0]["balance"], -100.0)  # unchanged
+
+    def test_update_store_card_account_not_found(self) -> None:
+        update_data = {"provider": "Costco"}
+        with self.assertRaises(StoreCardAccountUpdateError) as context:
+            self.card.update(999, update_data)
+        self.assertIn(
+            "Unable to update credit card account", str(context.exception)
+        )
+        self.assertIn(
+            "Record with ID 999 does not exist", str(context.exception)
+        )
 
 
 if __name__ == "__main__":
