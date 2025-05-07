@@ -5,6 +5,7 @@ from core.exceptions import RecordNotFoundError
 from features.payable.bill.model import Bills
 from features.payable.bill.schema import CREATE_BILLS_TABLE
 from features.payable.bill.exceptions import (
+    BillUpdateError,
     BillProviderCloseError,
     BillProviderCreationError,
 )
@@ -64,6 +65,37 @@ class TestBills(unittest.TestCase):
         with self.assertRaises(BillProviderCloseError) as context:
             self.bills.close(999)
         self.assertIn("Unable to remove provider", str(context.exception))
+        self.assertIn(
+            "Record with ID 999 does not exist", str(context.exception)
+        )
+
+    def test_update_bill_provider_valid(self) -> None:
+        self.cursor.execute(
+            "INSERT INTO bills (provider, monthly_charge) VALUES (?, ?)",
+            ("Electric Co", 75.50),
+        )
+        self.connection.commit()
+
+        update_data = {"provider": "Gas Co", "monthly_charge": "65.00"}
+        self.bills.update(1, update_data)
+
+        result = self.bills.get_one(1)
+        self.assertEqual(
+            result,
+            [
+                {
+                    "id": 1,
+                    "provider": "Gas Co",
+                    "monthly_charge": 65.00,
+                }
+            ],
+        )
+
+    def test_update_bill_provider_not_found(self) -> None:
+        update_data = {"provider": "Water Co"}
+        with self.assertRaises(BillUpdateError) as context:
+            self.bills.update(999, update_data)
+        self.assertIn("Unable to update bill details", str(context.exception))
         self.assertIn(
             "Record with ID 999 does not exist", str(context.exception)
         )
