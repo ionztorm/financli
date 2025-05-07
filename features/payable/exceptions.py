@@ -16,3 +16,7 @@ class PayableOpenError(PayableError):
 
 class PayablePaymentError(PayableError):
     pass
+
+
+class PayableUpdateError(PayableError):
+    pass
