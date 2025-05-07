@@ -83,3 +83,12 @@ class Controller:
 
         except Exception as e:
             raise wrap_error(TransactionError, "Transaction failed")(e) from e
+
+    def update(self, data: dict) -> None:
+        account_type = self.utility._get_account_type(
+            data, AccountTypeKeys.DEFAULT
+        )
+        id = self.utility._get_id(data, IDKeys.ID)
+        model = self.utility._get_model(account_type)
+        if not isinstance(model, Transaction):
+            model.update(id, data)
