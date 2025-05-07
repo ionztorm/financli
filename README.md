@@ -92,52 +92,76 @@ python -m unittest discover tests
 ```
 financli/
 ├── core/
-│   ├── controller.py               # Orchestrates actions on accounts
-│   ├── db.py                       # Database connection and setup
-│   ├── exceptions.py               # Shared error types
-│   ├── main.py                     # Entry point for core logic
-│   └── utility_service.py          # Provides utility functions for the controller
-│   └── transaction_service.py      # Provides transaction functions for the controller
-│
+│   ├── __init__.py                  # Package initializer
+│   ├── base_model.py                # Base model for inheritance
+│   ├── cli/                         # CLI-related scripts
+│   │   ├── __init__.py              # Package initializer for CLI
+│   │   ├── close.py                 # Close operation script
+│   │   ├── open.py                  # Open operation script
+│   │   ├── transaction.py           # Transaction operations
+│   │   └── update.py                # Update operations
+│   ├── controller.py                # Orchestrates actions on accounts
+│   ├── data/                        # Database and related files
+│   │   └── financli.db              # SQLite database file
+│   ├── db.py                        # Database connection and setup
+│   ├── exceptions/                  # Exception handling
+│   ├── exceptions.py                # Shared error types
+│   ├── main.py                      # Entry point for core logic
+│   ├── transaction_service.py       # Transaction-related functions
+│   ├── utility_service.py           # Utility functions for controller
+│   └── utils/                       # Utility-related files
+│       ├── __init__.py              # Package initializer for utils
+│       ├── constants.py             # Constant values
+│       ├── helpers.py               # Helper functions and error wrappers
+│       ├── model_types.py           # Type definitions for models
+│       └── types.py                 # Enum definitions
+├── data/                            # Database storage folder
+│   └── financli.db                  # SQLite database file
 ├── features/
-│   ├── accounts/
-│   │   ├── bank/
+│   ├── accounts/                    # Account-related features
+│   │   ├── __init__.py              # Package initializer for accounts
+│   │   ├── bank/                    # Bank account features
 │   │   │   ├── exceptions.py       # Domain-specific errors for bank accounts
 │   │   │   ├── model.py            # Bank account logic
 │   │   │   └── schema.py           # Table schema for SQLite
-│   │   ├── credit_card/
+│   │   ├── credit_card/             # Credit card account features
 │   │   │   ├── exceptions.py       # Domain-specific errors for credit cards
 │   │   │   ├── model.py            # Credit card account logic
 │   │   │   └── schema.py           # Table schema for SQLite
-│   ├── payable/
-│   │   ├── bill/
+│   │   ├── exceptions.py           # Domain-specific errors for accounts
+│   │   ├── model.py                # Common account logic
+│   │   └── schema.py               # Common table schema for SQLite
+│   ├── payable/                     # Payable-related features
+│   │   ├── __init__.py              # Package initializer for payable
+│   │   ├── bill/                    # Bill-related features
 │   │   │   ├── exceptions.py       # Domain-specific errors for bills
 │   │   │   ├── model.py            # Bill logic
 │   │   │   └── schema.py           # Table schema for SQLite
-│   │   └── subscription/
-│   │   │   ├── exceptions.py       # Domain-specific errors for subscriptions
-│   │   │   ├── model.py            # Subscription logic
-│   │   │   └── schema.py           # Table schema for SQLite
-│
-├── tests/
-│   ├── test_bank_model.py          # Unit tests for Bank model
-│   ├── test_base_model.py          # Unit tests for Base model
-│   ├── test_bill_model.py          # Unit tests for Bill model
-│   ├── test_controller.py          # Unit tests for Controller
-│   ├── test_credit_card_model.py   # Unit tests for CreditCard model
-│   ├── test_db_connectivity.py     # Unit tests for DB connectivity
-│   ├── test_store_card_model.py    # Unit tests for StoreCard model
-│   └── test_subscription_model.py  # Unit tests for Subscription model
-│
-├── utils/
-│   ├── constants.py                # Constant values
-│   ├── helpers.py                  # Error wrappers, etc.
-│   ├── model_types.py              # Type definitions for models
-│   └── types.py                    # Enum definitions
-│
-├── run_tests.sh                    # Bash script to run tests
-├── main.py                         # Main entry point
-└── README.md
+│   │   ├── exceptions.py           # Domain-specific errors for payable
+│   │   └── subscription/           # Subscription-related features
+│   │       ├── exceptions.py       # Domain-specific errors for subscriptions
+│   │       ├── model.py            # Subscription logic
+│   │       └── schema.py           # Table schema for SQLite
+│   ├── transactions/                # Transaction-related features
+│   │   ├── exceptions.py           # Domain-specific errors for transactions
+│   │   ├── model.py                # Transaction logic
+│   │   └── schema.py               # Table schema for SQLite
+│   └── tests/                       # Tests for features
+│       ├── test_bank_model.py       # Unit tests for Bank model
+│       ├── test_base_model.py       # Unit tests for Base model
+│       ├── test_bill_model.py       # Unit tests for Bill model
+│       ├── test_controller.py       # Unit tests for Controller
+│       ├── test_credit_card_model.py# Unit tests for CreditCard model
+│       ├── test_db_connectivity.py  # Unit tests for DB connectivity
+│       ├── test_store_card_model.py # Unit tests for StoreCard model
+│       └── test_subscription_model.py# Unit tests for Subscription model
+├── LICENSE                          # License for the project
+├── main.py                          # Main entry point
+├── plan.md                          # Project planning and roadmap
+├── README.md                        # Project documentation
+├── run_tests.sh                     # Bash script to run tests
+├── test.db                          # Test database file
+└── tui/                             # Text-based UI files
 ```
 
 ---
@@ -153,7 +177,6 @@ financli/
 - [ ] TUI with curses or Textual
 - [ ] CSV and PDF exports
 - [ ] Reporting and summaries
-- [ ] Budget tracking and projections
 
 ### 🧱 Account Type Support
 
@@ -163,6 +186,7 @@ financli/
 - [x] Close account
 - [x] Deposit
 - [x] Withdraw
+- [x] Update
 - ✅ All tests passing
 
 #### 💳 Credit Cards
@@ -171,6 +195,7 @@ financli/
 - [x] Close account
 - [x] Deposit
 - [x] Withdraw
+- [x] Update
 - ✅ All tests passing
 
 #### 🏬 Store Cards
@@ -179,6 +204,7 @@ financli/
 - [x] Close account
 - [x] Deposit
 - [x] Withdraw
+- [x] Update
 - ✅ All tests passing
 
 #### 💰 Loans
@@ -186,17 +212,20 @@ financli/
 - [x] Open account
 - [x] Close account
 - [x] Deposit
+- [x] Update
 
 #### 🧾 Bills
 
 - [x] Open account
 - [x] Close account
+- [x] Update
 - ✅ All tests passing
 
 #### 🔁 Subscriptions
 
 - [x] Open account
 - [x] Close account
+- [x] Update
 - ✅ All tests passing
 
 ### Transactions
