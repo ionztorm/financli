@@ -6,6 +6,7 @@ from utils.types import TableName
 from utils.helpers import wrap_error
 from features.payable.base import PayOnly
 from features.payable.subscription.exceptions import (
+    SubscriptionUpdateError,
     SubscriptionCreationError,
     SubscriptionTerminationError,
 )
@@ -32,5 +33,15 @@ class Subscriptions(PayOnly):
         except Exception as e:
             wrapper = wrap_error(
                 SubscriptionTerminationError, "Unable to remove subscription"
+            )
+            raise wrapper(e) from e
+
+    @override
+    def update(self, id: int, data: dict) -> None:
+        try:
+            super().update(id, data)
+        except Exception as e:
+            wrapper = wrap_error(
+                SubscriptionUpdateError, "Unable to update bill details "
             )
             raise wrapper(e) from e

@@ -8,3 +8,7 @@ class SubscriptionCreationError(SubscriptionError):
 
 class SubscriptionTerminationError(SubscriptionError):
     pass
+
+
+class SubscriptionUpdateError(SubscriptionError):
+    pass
