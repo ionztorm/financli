@@ -1,0 +1,5 @@
+InquirerPy @ git+https://github.com/kazhala/InquirerPy@714d9068896c1a1f9f4d1354f43f922cd5cfe16d
+pfzy==0.3.4
+prompt_toolkit==3.0.51
+tabulate==0.9.0
+wcwidth==0.2.13
