@@ -17,20 +17,21 @@
   - [ ] Loans
     - [ ] Model
     - [ ] Tests
-  - [ ] Pay Only
-  - [ ] Subscriptions
-    - [ ] Model
-    - [ ] Tests
-  - [ ] Bills
-    - [ ] Model
-    - [ ] Tests
+  - [x] Pay Only
+  - [x] Subscriptions
+    - [x] Model
+    - [x] Tests
+  - [x] Bills
+    - [x] Model
+    - [x] Tests
 
 - [ ] add 'edit()' to Transactions, in case a user makes a mistake when logging. This should consider that adjustments to the payment amount, or the source or destination accounts will require balance corrections.
 
-- [ ] implement 'list()' on Controller to allow listing based on selected account types.
+- [x] implement 'list()' on Controller to allow listing based on selected account types.
 
 ## CLI
 
+- [x] implement 'update' CLI parser
 - [ ] implement 'list' CLI parser. `list --account-type`. Include InquirerPy functionality for account type selection if subparser is not used.
 - [ ] implement 'report' CLI parser `report --report-type`. Include InquirerPy functionality for report type selection if subparser is not used.
 
