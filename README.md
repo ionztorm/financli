@@ -149,7 +149,7 @@ financli/
 - [x] Deposit / Withdraw / Transfer
 - [x] Validation and exception handling
 - [x] Test coverage for core features
-- [ ] CLI command interface
+- [x] CLI command interface
 - [ ] TUI with curses or Textual
 - [ ] CSV and PDF exports
 - [ ] Reporting and summaries
