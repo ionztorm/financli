@@ -7,6 +7,7 @@ from features.accounts.credit_card.schema import CREATE_CREDIT_CARDS_TABLE
 from features.accounts.credit_card.exceptions import (
     CreditCardAccountOpenError,
     CreditCardAccountCloseError,
+    CreditCardAccountUpdateError,
     CreditCardAccountDepositError,
     CreditCardAccountWithdrawalError,
 )
@@ -104,6 +105,33 @@ class TestCreditCard(unittest.TestCase):
         self.connection.commit()
         with self.assertRaises(CreditCardAccountDepositError):
             self.card.deposit(1, 100.0)
+
+    def test_update_credit_card_account_valid(self) -> None:
+        self.cursor.execute(
+            "INSERT INTO credit_cards (provider, balance, limiter) "
+            "VALUES (?, ?, ?)",
+            ("Visa", -100.0, -1000.0),
+        )
+        self.connection.commit()
+
+        update_data = {"provider": "Mastercard", "limiter": "-1500.0"}
+        self.card.update(1, update_data)
+
+        result = self.card.get_one(1)
+        self.assertEqual(result[0]["provider"], "Mastercard")
+        self.assertEqual(result[0]["limiter"], -1500.0)
+        self.assertEqual(result[0]["balance"], -100.0)  # unchanged
+
+    def test_update_credit_card_account_not_found(self) -> None:
+        update_data = {"provider": "Amex"}
+        with self.assertRaises(CreditCardAccountUpdateError) as context:
+            self.card.update(999, update_data)
+        self.assertIn(
+            "Unable to update credit card account", str(context.exception)
+        )
+        self.assertIn(
+            "Record with ID 999 does not exist", str(context.exception)
+        )
 
 
 if __name__ == "__main__":
