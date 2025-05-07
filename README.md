@@ -1,47 +1,48 @@
-# 💸 FinanCLI
+# FinanCLI
 
 **FinanCLI** is a command-line financial management tool designed to help you track, manage, and visualize your accounts and transactions — all from your terminal.
 
 It aims to be:
 
-- 🧾 A personal finance tracker
-- 📊 A CLI-based budgeting and reporting tool
-- 🔁 A full-featured interface for managing accounts and transactions
+- A personal finance tracker
+- A CLI-based budgeting and reporting tool
+- A full-featured interface for managing accounts and transactions
 
 ---
 
-## 🚀 Features
+## Features
 
-- ✅ Open, close, deposit, and withdraw from accounts
-- ✅ Internal transfers between accounts
-- ✅ SQLite-backed data persistence
-- ✅ Validation and error handling with helpful messages
-- ✅ Modular controller and model architecture
-- 🧱 Support for various account types:
-  - 🏦 Bank Accounts
-  - 💳 Credit Cards
-  - 🏬 Store Cards
-  - 💰 Loans
-  - 🧾 Bills
-  - 🔁 Subscriptions
-- 📦 CLI entry point with command routing
-- 📄 PDF reports and CSV export
-- 📋 Budgeting tools and financial summaries
-- 📊 Tables using `tabulate`
+- Open, close, deposit, and withdraw from accounts
+- Internal transfers between accounts
+- SQLite-backed data persistence
+- Validation and error handling with helpful messages
+- Modular controller and model architecture
+- Support for various account types:
+  - Bank Accounts
+  - Credit Cards
+  - Store Cards
+  - Loans
+  - Bills
+  - Subscriptions
+- CLI entry point with command routing
+- PDF reports and CSV export
+- Budgeting tools and financial summaries
+- Tables using `tabulate`
 
 ---
 
-## ⚙️ Requirements
+## Requirements
 
 - Python 3.10+
 - `sqlite3` (standard library)
 - [`tabulate`](https://pypi.org/project/tabulate/)
 - [`reportlab`](https://pypi.org/project/reportlab/) (for PDF generation)
 - [`pandas`](https://pypi.org/project/pandas/) (for CSV export)
+- [`InquirerPy`](https://pypi.org/project/InquirerPy/) (for interactive CLI prompts)
 
 ---
 
-## 🧰 Setup
+## Setup
 
 1. Clone the repository:
 
@@ -65,7 +66,7 @@ It aims to be:
 
 ---
 
-## 🧪 Running Tests
+## Running Tests
 
 You can run the full test suite using the provided script:
 
@@ -87,7 +88,7 @@ python -m unittest discover tests
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 financli/
@@ -131,6 +132,9 @@ financli/
 │   │   ├── exceptions.py           # Domain-specific errors for accounts
 │   │   ├── model.py                # Common account logic
 │   │   └── schema.py               # Common table schema for SQLite
+│   ├── banks/                       # Bank-related features
+│   │   └── tests/                   # Tests for bank features
+│   │       └── test_bank.py         # Bank feature tests
 │   ├── payable/                     # Payable-related features
 │   │   ├── __init__.py              # Package initializer for payable
 │   │   ├── bill/                    # Bill-related features
@@ -166,9 +170,9 @@ financli/
 
 ---
 
-## 🛣️ Roadmap
+## Roadmap
 
-### ✅ Core Features
+### Core Features
 
 - [x] Deposit / Withdraw / Transfer
 - [x] Validation and exception handling
@@ -178,55 +182,55 @@ financli/
 - [ ] CSV and PDF exports
 - [ ] Reporting and summaries
 
-### 🧱 Account Type Support
+### Account Type Support
 
-#### 🏦 Bank Accounts
-
-- [x] Open account
-- [x] Close account
-- [x] Deposit
-- [x] Withdraw
-- [x] Update
-- ✅ All tests passing
-
-#### 💳 Credit Cards
+#### Bank Accounts
 
 - [x] Open account
 - [x] Close account
 - [x] Deposit
 - [x] Withdraw
 - [x] Update
-- ✅ All tests passing
+- All tests passing
 
-#### 🏬 Store Cards
+#### Credit Cards
 
 - [x] Open account
 - [x] Close account
 - [x] Deposit
 - [x] Withdraw
 - [x] Update
-- ✅ All tests passing
+- All tests passing
 
-#### 💰 Loans
+#### Store Cards
+
+- [x] Open account
+- [x] Close account
+- [x] Deposit
+- [x] Withdraw
+- [x] Update
+- All tests passing
+
+#### Loans
 
 - [x] Open account
 - [x] Close account
 - [x] Deposit
 - [x] Update
 
-#### 🧾 Bills
+#### Bills
 
 - [x] Open account
 - [x] Close account
 - [x] Update
-- ✅ All tests passing
+- All tests passing
 
-#### 🔁 Subscriptions
+#### Subscriptions
 
 - [x] Open account
 - [x] Close account
 - [x] Update
-- ✅ All tests passing
+- All tests passing
 
 ### Transactions
 
@@ -236,12 +240,12 @@ financli/
 
 ---
 
-## 📄 Licence
+## Licence
 
-[MIT](LICENSE) — do what you want, just give credit. Built with caffeine & clean code vibes ☕️
+[MIT](LICENSE) — do what you want, just give credit. Built with caffeine & clean code vibes
 
 ---
 
-## ✨ Contributing
+## Contributing
 
 FinanCLI is in active development. Contributions are welcome! If you're interested in CLI UX, data visualization, or financial tools — hop in!
