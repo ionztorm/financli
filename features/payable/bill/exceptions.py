@@ -8,3 +8,7 @@ class BillProviderCreationError(BillError):
 
 class BillProviderCloseError(BillError):
     pass
+
+
+class BillUpdateError(BillError):
+    pass

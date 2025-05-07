@@ -6,6 +6,7 @@ from utils.types import TableName
 from utils.helpers import wrap_error
 from features.payable.base import PayOnly
 from features.payable.bill.exceptions import (
+    BillUpdateError,
     BillProviderCloseError,
     BillProviderCreationError,
 )
@@ -32,5 +33,15 @@ class Bills(PayOnly):
         except Exception as e:
             wrapper = wrap_error(
                 BillProviderCloseError, "Unable to remove provider"
+            )
+            raise wrapper(e) from e
+
+    @override
+    def update(self, id: int, data: dict) -> None:
+        try:
+            super().update(id, data)
+        except Exception as e:
+            wrapper = wrap_error(
+                BillUpdateError, "Unable to update bill details "
             )
             raise wrapper(e) from e
