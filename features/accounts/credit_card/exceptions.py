@@ -16,3 +16,7 @@ class CreditCardAccountDepositError(CreditCardError):
 
 class CreditCardAccountWithdrawalError(CreditCardError):
     pass
+
+
+class CreditCardAccountUpdateError(CreditCardError):
+    pass
