@@ -4,26 +4,26 @@
 
 - [ ] add 'update()' method to Bank, Credit Card, Store Card, Bill, and Subscription models. This should allow users to make ammendments to accounts:
 
-  - [ ] Accounts
-    - [x] Bank
-      - [x] Model
-      - [x] Tests
-    - [ ] Credit Card
-      - [ ] Model
-      - [ ] Tests
-    - [ ] Store Card
-      - [ ] Model
-      - [ ] Tests
-    - [ ] Loans
-      - [ ] Model
-      - [ ] Tests
+  - [x] Accounts
+  - [x] Bank
+    - [x] Model
+    - [x] Tests
+  - [x] Credit Card
+    - [x] Model
+    - [x] Tests
+  - [x] Store Card
+    - [x] Model
+    - [x] Tests
+  - [ ] Loans
+    - [ ] Model
+    - [ ] Tests
   - [ ] Pay Only
-    - [ ] Subscriptions
-      - [ ] Model
-      - [ ] Tests
-    - [ ] Bills
-      - [ ] Model
-      - [ ] Tests
+  - [ ] Subscriptions
+    - [ ] Model
+    - [ ] Tests
+  - [ ] Bills
+    - [ ] Model
+    - [ ] Tests
 
 - [ ] add 'edit()' to Transactions, in case a user makes a mistake when logging. This should consider that adjustments to the payment amount, or the source or destination accounts will require balance corrections.
 
