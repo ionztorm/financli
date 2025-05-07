@@ -16,3 +16,7 @@ class StoreCardAccountDepositError(StoreCardError):
 
 class StoreCardAccountWithdrawalError(StoreCardError):
     pass
+
+
+class StoreCardAccountUpdateError(StoreCardError):
+    pass

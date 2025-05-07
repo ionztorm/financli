@@ -10,6 +10,7 @@ from features.accounts.exceptions import AccountHasBalanceError
 from features.accounts.store_card.exceptions import (
     StoreCardAccountOpenError,
     StoreCardAccountCloseError,
+    StoreCardAccountUpdateError,
     StoreCardAccountDepositError,
     StoreCardAccountWithdrawalError,
 )
@@ -104,5 +105,16 @@ class StoreCard(Accounts):
         except Exception as e:
             wrapper = wrap_error(
                 StoreCardAccountDepositError, "Unable to complete deposit."
+            )
+            raise wrapper(e) from e
+
+    @override
+    def update(self, id: int, data: dict) -> None:
+        try:
+            super().update(id, data)
+        except Exception as e:
+            wrapper = wrap_error(
+                StoreCardAccountUpdateError,
+                "Unable to update credit card account ",
             )
             raise wrapper(e) from e
