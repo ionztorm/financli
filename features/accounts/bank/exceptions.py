@@ -16,3 +16,11 @@ class BankAccountDepositError(BankError):
 
 class BankAccountWithdrawalError(BankError):
     pass
+
+
+class BankAccountNotFoundError(BankError):
+    pass
+
+
+class BankAccountUpdateError(BankError):
+    pass

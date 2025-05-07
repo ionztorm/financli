@@ -6,10 +6,13 @@ from utils.types import TableName
 from utils.helpers import wrap_error
 from utils.constants import CURRENCY_SYMBOL
 from features.accounts.base import Accounts
-from features.accounts.exceptions import AccountHasBalanceError
+from features.accounts.exceptions import (
+    AccountHasBalanceError,
+)
 from features.accounts.bank.exceptions import (
     BankAccountOpenError,
     BankAccountCloseError,
+    BankAccountUpdateError,
     BankAccountDepositError,
     BankAccountWithdrawalError,
 )
@@ -84,5 +87,15 @@ class Bank(Accounts):
         except Exception as e:
             wrapper = wrap_error(
                 BankAccountDepositError, "Unable to complete deposit."
+            )
+            raise wrapper(e) from e
+
+    @override
+    def update(self, id: int, data: dict) -> None:
+        try:
+            super().update(id, data)
+        except Exception as e:
+            wrapper = wrap_error(
+                BankAccountUpdateError, "Unable to update bank account "
             )
             raise wrapper(e) from e
