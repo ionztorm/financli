@@ -10,6 +10,7 @@ from core.exceptions import (
 )
 from features.accounts.exceptions import (
     AccountOpenError,
+    AccountUpdateError,
     AccountDeletionError,
     AccountNotFoundError,
     AccountWithdrawalError,
@@ -94,5 +95,20 @@ class Accounts(Table):
             wrapper = wrap_error(
                 AccountWithdrawalError,
                 "Failed to update balance",
+            )
+            raise wrapper(e) from e
+
+    def update(self, id: int, data: dict) -> None:
+        try:
+            self.get_one(id)[0]
+            self._update(id, data)
+        except RecordNotFoundError as e:
+            wrapper = wrap_error(
+                AccountNotFoundError, "Could not find account to update "
+            )
+            raise wrapper(e) from e
+        except QueryExecutionError as e:
+            wrapper = wrap_error(
+                AccountUpdateError, "Could not update account "
             )
             raise wrapper(e) from e

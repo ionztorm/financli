@@ -20,3 +20,7 @@ class AccountOpenError(AccountError):
 
 class AccountWithdrawalError(AccountError):
     pass
+
+
+class AccountUpdateError(AccountError):
+    pass
