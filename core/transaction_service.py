@@ -20,7 +20,7 @@ class TransactionService:
         amount = self.utility._get_amount(data)
 
         model = self.utility._get_destination_model(account_type)
-        if isinstance(model, PayOnly):
+        if isinstance(model, PayOnly) or isinstance(model, Transaction):
             raise ValueError(f"Cannot deposit into {account_type}.")
         model.deposit(account_id, amount)
 
@@ -31,7 +31,7 @@ class TransactionService:
         amount = self.utility._get_amount(data)
 
         model = self.utility._get_source_model(account_type)
-        if isinstance(model, PayOnly):
+        if isinstance(model, PayOnly) or isinstance(model, Transaction):
             raise ValueError(f"Cannot withdraw from {account_type}.")
         model.withdraw(account_id, amount)
 
