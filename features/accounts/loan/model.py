@@ -10,13 +10,14 @@ from features.accounts.exceptions import AccountHasBalanceError
 from features.accounts.loan.exceptions import (
     LoanAccountOpenError,
     LoanAccountCloseError,
+    LoanAccountUpdateError,
     LoanAccountDepositError,
 )
 
 
 class Loan(Accounts):
     def __init__(self, connection: sqlite3.Connection) -> None:
-        super().__init__(connection, TableName.BANKS)
+        super().__init__(connection, TableName.LOANS)
 
     @override
     def open(self, data: dict) -> None:
@@ -26,7 +27,7 @@ class Loan(Accounts):
             super().open(data)
         except Exception as e:
             wrapper = wrap_error(
-                LoanAccountOpenError, "Unable to open bank account."
+                LoanAccountOpenError, "Unable to open loan account."
             )
             raise wrapper(e) from e
 
@@ -36,7 +37,7 @@ class Loan(Accounts):
             super().close(id)
         except Exception as e:
             wrapper = wrap_error(
-                LoanAccountCloseError, "Unable to close bank account."
+                LoanAccountCloseError, "Unable to close loan account."
             )
             raise wrapper(e) from e
 
@@ -59,5 +60,15 @@ class Loan(Accounts):
         except Exception as e:
             wrapper = wrap_error(
                 LoanAccountDepositError, "Unable to complete deposit."
+            )
+            raise wrapper(e) from e
+
+    @override
+    def update(self, id: int, data: dict) -> None:
+        try:
+            super().update(id, data)
+        except Exception as e:
+            wrapper = wrap_error(
+                LoanAccountUpdateError, "Unable to update loan account "
             )
             raise wrapper(e) from e

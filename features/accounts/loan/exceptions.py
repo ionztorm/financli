@@ -16,3 +16,7 @@ class LoanAccountDepositError(LoanError):
 
 class LoanAccountWithdrawalError(LoanError):
     pass
+
+
+class LoanAccountUpdateError(LoanError):
+    pass
