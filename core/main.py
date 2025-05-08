@@ -1,6 +1,7 @@
 import argparse
 
 from core.db import create_data_path
+from core.cli.list import register_list_command
 from core.cli.open import register_open_command
 from utils.helpers import load_or_create_settings
 from core.cli.close import register_close_command
@@ -25,6 +26,7 @@ def main() -> None:
     register_close_command(subparsers)
     register_transact_command(subparsers)
     register_update_command(subparsers)
+    register_list_command(subparsers)
 
     args = parser.parse_args()
 
