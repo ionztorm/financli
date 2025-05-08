@@ -6,21 +6,8 @@ from InquirerPy.validator import EmptyInputValidator
 from core.db import get_connection
 from utils.helpers import msg, print_table
 from core.controller import Controller
+from utils.constants import FIELD_MAP
 from core.utils.validator import TYPE_VALIDATORS
-
-REQUIRED_FIELDS = {
-    "bank": [
-        ("provider", str),
-        ("balance", float),
-        ("alias", str),
-        ("limiter", float),
-    ],
-    "credit card": [("provider", str), ("balance", float), ("limiter", float)],
-    "store card": [("provider", str), ("balance", float), ("limiter", float)],
-    "loan": [("provider", str), ("balance", float)],
-    "subscription": [("provider", str), ("monthly_charge", float)],
-    "bill": [("provider", str), ("monthly_charge", float)],
-}
 
 
 def register_open_command(subparsers: argparse._SubParsersAction) -> None:
@@ -77,10 +64,10 @@ def handle_open(args: argparse.Namespace) -> None:
     if not account_type:
         account_type = inquirer.select(
             message="Choose account type:",
-            choices=list(REQUIRED_FIELDS.keys()),
+            choices=list(FIELD_MAP.keys()),
         ).execute()
 
-    required_fields = REQUIRED_FIELDS.get(account_type, [])
+    required_fields = FIELD_MAP.get(account_type, [])
     data = {"account_type": account_type}
 
     for field, field_type in required_fields:

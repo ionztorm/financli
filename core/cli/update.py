@@ -6,7 +6,7 @@ from InquirerPy.validator import EmptyInputValidator
 from core.db import get_connection
 from utils.helpers import msg, print_table
 from core.controller import Controller
-from utils.constants import ACCOUNT_TYPES
+from utils.constants import FIELD_MAP, ACCOUNT_TYPES
 from core.utils.validator import TYPE_VALIDATORS
 
 
@@ -72,15 +72,13 @@ def handle_update(args: argparse.Namespace) -> None:
         # loop through to create list of fields
         # use inquirer.select to allow user to select which field to update
         # after each selection, confirm if they want to update another field
-        field_map = {
-            "bank": ["provider", "alias", "balance", "limiter"],
-            "credit card": ["provider", "balance", "limiter"],
-            "store card": ["provider", "balance", "limiter"],
-            "subscription": ["provider", "monthly_charge"],
-            "bill": ["provider", "monthly_charge"],
-        }
+        fields_with_types = FIELD_MAP.get(account_type.lower())
+        if not fields_with_types:
+            msg(f"No updatable fields defined for account type: {account_type}")
+            return
 
-        fields = field_map.get(account_type.lower())
+        fields = [field for field, _ in fields_with_types]
+
         if not fields:
             msg(f"No updatable fields defined for account type: {account_type}")
             return
