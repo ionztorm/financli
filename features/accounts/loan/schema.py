@@ -1,4 +1,4 @@
-CREATE_LOAN_CARDS_TABLE = """
+CREATE_LOAN_TABLE = """
     CREATE TABLE IF NOT EXISTS loans (
         id INTEGER PRIMARY KEY,
         provider TEXT NOT NULL,
