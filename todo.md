@@ -2,7 +2,7 @@
 
 ## Models
 
-- [ ] add 'update()' method to Bank, Credit Card, Store Card, Bill, and Subscription models. This should allow users to make ammendments to accounts:
+- [x] add 'update()' method to Bank, Credit Card, Store Card, Bill, and Subscription models. This should allow users to make ammendments to accounts:
 
   - [x] Accounts
   - [x] Bank
@@ -14,9 +14,9 @@
   - [x] Store Card
     - [x] Model
     - [x] Tests
-  - [ ] Loans
-    - [ ] Model
-    - [ ] Tests
+  - [x] Loans
+    - [x] Model
+    - [x] Tests
   - [x] Pay Only
   - [x] Subscriptions
     - [x] Model
@@ -32,7 +32,7 @@
 ## CLI
 
 - [x] implement 'update' CLI parser
-- [ ] implement 'list' CLI parser. `list --account-type`. Include InquirerPy functionality for account type selection if subparser is not used.
+- [x] implement 'list' CLI parser. `list --account-type`. Include InquirerPy functionality for account type selection if subparser is not used.
 - [ ] implement 'report' CLI parser `report --report-type`. Include InquirerPy functionality for report type selection if subparser is not used.
 
 ## Reporting
