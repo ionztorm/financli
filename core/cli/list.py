@@ -5,7 +5,7 @@ from InquirerPy import inquirer
 from core.db import get_connection
 from utils.helpers import msg, print_table
 from core.controller import Controller
-from utils.constants import ACCOUNT_TYPES
+from utils.constants import EXTENDED_MENU
 
 
 def register_list_command(subparsers: argparse._SubParsersAction) -> None:
@@ -27,7 +27,7 @@ def handle_list(args: argparse.Namespace) -> None:
     account_type = args.account_type
     if not account_type:
         account_type = inquirer.select(
-            message="Please select an account type: ", choices=ACCOUNT_TYPES
+            message="Please select an account type: ", choices=EXTENDED_MENU
         ).execute()
 
     accounts = model.list({"account_type": account_type})
