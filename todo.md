@@ -37,6 +37,10 @@
 
 ## Reporting
 
-- [ ] implement exporting in CSV format
+- [x] implement exporting in CSV and JSON format
 - [ ] implement PDF reporting
 - [ ] implement CLI transaction filtering
+
+## Import
+
+- [x] Implement 'import' JSON and CSV
