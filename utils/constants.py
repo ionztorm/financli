@@ -60,3 +60,6 @@ FIELD_MAP = {
 
 TRANSACTION_TYPES = ["withdraw", "deposit", "pay another account", "payment"]
 ACCOUNT_TYPES = list(FIELD_MAP.keys())
+
+# Used for export, import, and list CLI
+EXTENDED_MENU = [*ACCOUNT_TYPES, "transaction"]
