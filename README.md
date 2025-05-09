@@ -37,7 +37,6 @@ It aims to be:
 - `sqlite3` (standard library)
 - [`tabulate`](https://pypi.org/project/tabulate/)
 - [`reportlab`](https://pypi.org/project/reportlab/) (for PDF generation)
-- [`pandas`](https://pypi.org/project/pandas/) (for CSV export)
 - [`InquirerPy`](https://pypi.org/project/InquirerPy/) (for interactive CLI prompts)
 
 ---
@@ -100,7 +99,9 @@ financli/
 │   │   ├── close.py                 # Close operation script
 │   │   ├── open.py                  # Open operation script
 │   │   ├── transaction.py           # Transaction operations
-│   │   └── update.py                # Update operations
+│   │   ├── update.py                # Update operations
+│   │   ├── imports.py               # Import JSON or CSV
+│   │   └── export.py                # Export to JSON, CSV, or TXT
 │   ├── controller.py                # Orchestrates actions on accounts
 │   ├── data/                        # Database and related files
 │   │   └── financli.db              # SQLite database file
@@ -178,8 +179,9 @@ financli/
 - [x] Validation and exception handling
 - [x] Test coverage for core features
 - [x] CLI command interface
-- [ ] TUI with curses or Textual
-- [ ] CSV and PDF exports
+- [x] CSV exports
+- [x] JSON exports
+- [ ] PDF exports
 - [ ] Reporting and summaries
 
 ### Account Type Support
