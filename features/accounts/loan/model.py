@@ -3,8 +3,8 @@ import sqlite3
 from typing import override
 
 from utils.types import TableName
+from utils.loader import get_currency
 from utils.helpers import wrap_error
-from utils.constants import CURRENCY_SYMBOL
 from features.accounts.base import Accounts
 from features.accounts.exceptions import AccountHasBalanceError
 from features.accounts.loan.exceptions import (
@@ -54,7 +54,7 @@ class Loan(Accounts):
             if new_balance > 0:
                 raise AccountHasBalanceError(
                     "Deposit would overpay the loan. "
-                    f"Only {CURRENCY_SYMBOL}{balance} is due"
+                    f"Only {get_currency()}{balance} is due"
                 )
             super().deposit(id, amount)
         except Exception as e:

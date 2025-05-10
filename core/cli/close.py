@@ -4,9 +4,10 @@ from InquirerPy import inquirer
 from InquirerPy.validator import EmptyInputValidator
 
 from core.db import get_connection
-from utils.helpers import msg, print_table
+from utils.helpers import msg
 from core.controller import Controller
 from core.utils.validator import TYPE_VALIDATORS
+from core.cli.utils.print_table import print_table
 
 ACCOUNT_TYPES = [
     "bank",

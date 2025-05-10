@@ -1,8 +1,8 @@
 import sqlite3
 import unittest
 
+from utils.loader import get_currency
 from core.exceptions import RecordNotFoundError
-from utils.constants import CURRENCY_SYMBOL
 from features.accounts.loan.model import Loan
 from features.accounts.loan.schema import CREATE_LOAN_TABLE
 from features.accounts.loan.exceptions import (
@@ -75,7 +75,8 @@ class TestLoan(unittest.TestCase):
             self.loan.deposit(1, 200.0)
         self.assertIn("Deposit would overpay the loan", str(context.exception))
         self.assertIn(
-            f"Only {CURRENCY_SYMBOL}-100.0 is due", str(context.exception)
+            f"Only {get_currency()}-100.0 is due",
+            str(context.exception),
         )
 
     def test_withdraw_not_allowed(self) -> None:

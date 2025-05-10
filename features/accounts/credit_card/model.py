@@ -3,8 +3,8 @@ import sqlite3
 from typing import override
 
 from utils.types import TableName
+from utils.loader import get_currency
 from utils.helpers import wrap_error
-from utils.constants import CURRENCY_SYMBOL
 from features.accounts.base import Accounts
 from features.accounts.exceptions import AccountHasBalanceError
 from features.accounts.credit_card.exceptions import (
@@ -47,7 +47,7 @@ class CreditCard(Accounts):
             if balance != 0.0:
                 raise AccountHasBalanceError(
                     "This account has a balance of "
-                    f"{CURRENCY_SYMBOL}{balance:.2f}. "
+                    f"{get_currency()}{balance:.2f}. "
                     "Please recfity this with a transaction."
                 )
         except Exception as e:
@@ -76,7 +76,7 @@ class CreditCard(Accounts):
             if (balance - amount) < -limit:
                 raise AccountHasBalanceError(
                     "Withdrawal would go over the credit limit. "
-                    f"Only {CURRENCY_SYMBOL}{limit - balance} can be withdrawn"
+                    f"Only {get_currency()}{limit - balance} can be withdrawn"
                 )
 
             super().withdraw(id, amount)
@@ -97,7 +97,7 @@ class CreditCard(Accounts):
             if new_balance > 0:
                 raise AccountHasBalanceError(
                     "Deposit would overpay the card. "
-                    f"Only {CURRENCY_SYMBOL}{balance} is due"
+                    f"Only {get_currency()}{balance} is due"
                 )
 
             super().deposit(id, amount)

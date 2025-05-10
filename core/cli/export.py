@@ -1,7 +1,9 @@
+import csv
 import json
 import argparse
 
 from pathlib import Path
+from datetime import datetime
 
 from InquirerPy import inquirer
 
@@ -33,37 +35,79 @@ def register_export_command(subparsers: argparse._SubParsersAction) -> None:
 def handle_export(args: argparse.Namespace) -> None:
     conn = get_connection()
     model = Controller(conn)
+    settings = args.settings
 
-    account_type = args.account_type
-    if not account_type:
-        account_type = inquirer.select(
+    account_type = (
+        args.account_type
+        or inquirer.select(
             message="Choose account type to export:",
             choices=EXTENDED_MENU,
         ).execute()
+    )
 
     records = model.list({"account_type": account_type})
     if not records:
         msg(f"No {account_type} accounts found to export.")
         return
 
-    file_format = args.filetype
-    if not file_format:
-        file_format = inquirer.select(
+    file_format = (
+        args.filetype
+        or inquirer.select(
             message="Select export format:",
             choices=["json", "csv", "txt"],
         ).execute()
+    )
+
+    timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M")
+    filename = f"{timestamp}-{account_type}_accounts.{file_format}"
+
+    output_file: Path | None = None
 
     if args.path:
         output_file = Path(args.path).expanduser().resolve()
     else:
-        default_name = f"{account_type}_accounts.{file_format}"
-        selected_path = inquirer.filepath(
-            message="Choose where to save the file:",
-            default=default_name,
-            only_files=True,
-            validate=lambda p: p.endswith(f".{file_format}"),
+        default_dir = Path(settings.get("export_path"))
+        default_path = default_dir / filename
+
+        choices = [
+            {
+                "name": "📁 Use default export path from settings",
+                "value": "default",
+            },
+            {
+                "name": "✏️  Enter a custom export path (one time)",
+                "value": "custom",
+            },
+            {"name": "🛠  Set a new default export path", "value": "update"},
+        ]
+        export_choice = inquirer.select(
+            message="Choose export path option:",
+            choices=choices,
         ).execute()
-        output_file = Path(selected_path).expanduser().resolve()
+
+        if export_choice == "default":
+            output_file = default_path
+
+        elif export_choice == "custom":
+            custom_path = inquirer.filepath(
+                message="Enter custom file path:",
+                default=str(default_path),
+                only_files=True,
+                validate=lambda p: p.endswith(f".{file_format}"),
+            ).execute()
+            output_file = Path(custom_path).expanduser().resolve()
+
+        elif export_choice == "update":
+            new_default_dir = inquirer.filepath(
+                message="Enter new default directory path:",
+                default=str(default_dir),
+                only_directories=True,
+            ).execute()
+            settings.set("export_path", str(Path(new_default_dir).expanduser()))
+            output_file = Path(new_default_dir).expanduser() / filename
+
+    if output_file is None:
+        raise RuntimeError("Output file path could not be determined.")
 
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
@@ -71,20 +115,14 @@ def handle_export(args: argparse.Namespace) -> None:
         if file_format == "json":
             output_file.write_text(json.dumps(records, indent=4))
         elif file_format == "csv":
-            import csv
-
             with output_file.open("w", newline="") as f:
                 writer = csv.DictWriter(f, fieldnames=records[0].keys())
                 writer.writeheader()
                 writer.writerows(records)
-
         elif file_format == "txt":
-            lines = [str(record) for record in records]
+            lines = [str(r) for r in records]
             output_file.write_text("\n".join(lines))
-        else:
-            msg(f"Unsupported format: {file_format}")
-            return
 
-        msg(f"{len(records)} {account_type} records exported to {output_file}")
+        msg(f"✅ Exported {len(records)} records to {output_file}")
     except Exception as e:
-        msg(f"Failed to export data: {e}")
+        msg(f"❌ Failed to export data: {e}")

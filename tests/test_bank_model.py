@@ -1,8 +1,8 @@
 import sqlite3
 import unittest
 
+from utils.loader import get_currency
 from core.exceptions import RecordNotFoundError
-from utils.constants import CURRENCY_SYMBOL
 from features.accounts.bank.model import Bank
 from features.accounts.bank.schema import CREATE_BANKS_TABLE
 from features.accounts.bank.exceptions import (
@@ -127,7 +127,7 @@ class TestBank(unittest.TestCase):
         self.assertEqual(
             str(context.exception),
             "Unable to complete withdrawal: Withdrawal would go below the "
-            f"overdraft limit. Only {CURRENCY_SYMBOL}150.00 can be withdrawn",
+            f"overdraft limit. Only {get_currency()}150.00 can be withdrawn",
         )
         self.assertIn(
             "Withdrawal would go below the overdraft limit. "

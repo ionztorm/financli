@@ -1,10 +1,6 @@
+from pathlib import Path
+
 from utils.types import TableName
-from utils.helpers import load_or_create_settings
-
-CURRENCY_SYMBOL = currency = load_or_create_settings().get(
-    "currency_symbol", "£"
-)
-
 
 TYPE_CONFIG = {
     TableName.BANKS: {
@@ -63,3 +59,6 @@ ACCOUNT_TYPES = list(FIELD_MAP.keys())
 
 # Used for export, import, and list CLI
 EXTENDED_MENU = [*ACCOUNT_TYPES, "transaction"]
+
+CONFIG_DIR = Path.home() / ".config" / "financli"
+SETTINGS_PATH = CONFIG_DIR / "settings.json"

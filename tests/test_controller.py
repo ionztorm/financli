@@ -3,9 +3,9 @@ import unittest
 
 from datetime import datetime
 
+from utils.loader import get_currency
 from core.controller import Controller, TransactionError
 from core.exceptions import RecordNotFoundError
-from utils.constants import CURRENCY_SYMBOL
 from features.payable.bill.schema import CREATE_BILLS_TABLE
 from features.transactions.schema import CREATE_TRANSACTIONS_TABLE
 from features.accounts.bank.schema import CREATE_BANKS_TABLE
@@ -189,7 +189,8 @@ class TestController(unittest.TestCase):
         self.assertIn("Unable to complete withdrawal", str(context.exception))
         self.assertIn(
             "Withdrawal would go below the overdraft limit. "
-            f"Only {CURRENCY_SYMBOL}60.00 can be withdrawn",
+            f"Only {get_currency()}60.00 "
+            "can be withdrawn",
             str(context.exception),
         )
 

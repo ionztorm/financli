@@ -3,9 +3,10 @@ import argparse
 from InquirerPy import inquirer
 
 from core.db import get_connection
-from utils.helpers import msg, print_table
+from utils.helpers import msg
 from core.controller import Controller
 from utils.constants import EXTENDED_MENU
+from core.cli.utils.print_table import print_table
 
 
 def register_list_command(subparsers: argparse._SubParsersAction) -> None:
