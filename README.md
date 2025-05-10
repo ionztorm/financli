@@ -1,6 +1,6 @@
 # FinanCLI
 
-**FinanCLI** is a command-line financial management tool designed to help you track, manage, and visualize your accounts and transactions — all from your terminal.
+**FinanCLI** is a command-line financial management tool designed to help you track, manage, and visualise your accounts and transactions — all from your terminal.
 
 It aims to be:
 
