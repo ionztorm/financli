@@ -1,5 +1,7 @@
 # FinanCLI
 
+This is my first personal project as part of the [Boot.dev](https://boot.dev) curriculum, following completion of the Python path. I decided to build this project as it's something I currently already do using Microsoft Excel, and since I prefer to live in my terminal, I wanted something I could use without having to leave, or worse, grab my mouse.
+
 **FinanCLI** is a command-line financial management tool designed to help you track, manage, and visualise your accounts and transactions — all from your terminal.
 
 It aims to be:
@@ -7,6 +9,14 @@ It aims to be:
 - A personal finance tracker
 - A CLI-based budgeting and reporting tool
 - A full-featured interface for managing accounts and transactions
+
+## Demo
+
+![General Use](./assets/demo.gif)
+
+![Exporting](./assets/exportdemo.gif)
+
+![Importing](./assets/importdemo.gif)
 
 ---
 
@@ -35,7 +45,7 @@ It aims to be:
 
 - Python 3.10+
 - `sqlite3` (standard library)
-- [`tabulate`](https://pypi.org/project/tabulate/)
+- [`tabulate`](https://pypi.org/project/tabulate/) (tables, almost as beautiful as Boots)
 - [`reportlab`](https://pypi.org/project/reportlab/) (for PDF generation)
 - [`InquirerPy`](https://pypi.org/project/InquirerPy/) (for interactive CLI prompts)
 
@@ -65,6 +75,40 @@ It aims to be:
 
 ---
 
+## Usage
+
+FinanCLI supports both **non-interactive (flags)** and **interactive (prompted)** CLI usage.
+
+You can run any command with full arguments:
+
+```bash
+python main.py open --account-type bank --provider "Chase" --balance 500.00
+```
+
+Or launch it interactively with prompts:
+
+```bash
+python main.py open
+```
+
+You’ll be guided through selection of account type, fields, and values interactively.
+
+### Available Commands
+
+| Command    | Description                          |
+| ---------- | ------------------------------------ |
+| `open`     | Create a new account                 |
+| `close`    | Close an existing account            |
+| `deposit`  | Deposit funds into an account        |
+| `withdraw` | Withdraw funds from an account       |
+| `transfer` | Transfer funds between two accounts  |
+| `update`   | Update the details of an account     |
+| `list`     | List accounts or transactions        |
+| `import`   | Import accounts from JSON or CSV     |
+| `export`   | Export accounts to JSON, CSV, or TXT |
+
+---
+
 ## Running Tests
 
 You can run the full test suite using the provided script:
@@ -87,90 +131,6 @@ python -m unittest discover tests
 
 ---
 
-## Project Structure
-
-```
-financli/
-├── core/
-│   ├── __init__.py                  # Package initializer
-│   ├── base_model.py                # Base model for inheritance
-│   ├── cli/                         # CLI-related scripts
-│   │   ├── __init__.py              # Package initializer for CLI
-│   │   ├── close.py                 # Close operation script
-│   │   ├── open.py                  # Open operation script
-│   │   ├── transaction.py           # Transaction operations
-│   │   ├── update.py                # Update operations
-│   │   ├── imports.py               # Import JSON or CSV
-│   │   └── export.py                # Export to JSON, CSV, or TXT
-│   ├── controller.py                # Orchestrates actions on accounts
-│   ├── data/                        # Database and related files
-│   │   └── financli.db              # SQLite database file
-│   ├── db.py                        # Database connection and setup
-│   ├── exceptions/                  # Exception handling
-│   ├── exceptions.py                # Shared error types
-│   ├── main.py                      # Entry point for core logic
-│   ├── transaction_service.py       # Transaction-related functions
-│   ├── utility_service.py           # Utility functions for controller
-│   └── utils/                       # Utility-related files
-│       ├── __init__.py              # Package initializer for utils
-│       ├── constants.py             # Constant values
-│       ├── helpers.py               # Helper functions and error wrappers
-│       ├── model_types.py           # Type definitions for models
-│       └── types.py                 # Enum definitions
-├── data/                            # Database storage folder
-│   └── financli.db                  # SQLite database file
-├── features/
-│   ├── accounts/                    # Account-related features
-│   │   ├── __init__.py              # Package initializer for accounts
-│   │   ├── bank/                    # Bank account features
-│   │   │   ├── exceptions.py       # Domain-specific errors for bank accounts
-│   │   │   ├── model.py            # Bank account logic
-│   │   │   └── schema.py           # Table schema for SQLite
-│   │   ├── credit_card/             # Credit card account features
-│   │   │   ├── exceptions.py       # Domain-specific errors for credit cards
-│   │   │   ├── model.py            # Credit card account logic
-│   │   │   └── schema.py           # Table schema for SQLite
-│   │   ├── exceptions.py           # Domain-specific errors for accounts
-│   │   ├── model.py                # Common account logic
-│   │   └── schema.py               # Common table schema for SQLite
-│   ├── banks/                       # Bank-related features
-│   │   └── tests/                   # Tests for bank features
-│   │       └── test_bank.py         # Bank feature tests
-│   ├── payable/                     # Payable-related features
-│   │   ├── __init__.py              # Package initializer for payable
-│   │   ├── bill/                    # Bill-related features
-│   │   │   ├── exceptions.py       # Domain-specific errors for bills
-│   │   │   ├── model.py            # Bill logic
-│   │   │   └── schema.py           # Table schema for SQLite
-│   │   ├── exceptions.py           # Domain-specific errors for payable
-│   │   └── subscription/           # Subscription-related features
-│   │       ├── exceptions.py       # Domain-specific errors for subscriptions
-│   │       ├── model.py            # Subscription logic
-│   │       └── schema.py           # Table schema for SQLite
-│   ├── transactions/                # Transaction-related features
-│   │   ├── exceptions.py           # Domain-specific errors for transactions
-│   │   ├── model.py                # Transaction logic
-│   │   └── schema.py               # Table schema for SQLite
-│   └── tests/                       # Tests for features
-│       ├── test_bank_model.py       # Unit tests for Bank model
-│       ├── test_base_model.py       # Unit tests for Base model
-│       ├── test_bill_model.py       # Unit tests for Bill model
-│       ├── test_controller.py       # Unit tests for Controller
-│       ├── test_credit_card_model.py# Unit tests for CreditCard model
-│       ├── test_db_connectivity.py  # Unit tests for DB connectivity
-│       ├── test_store_card_model.py # Unit tests for StoreCard model
-│       └── test_subscription_model.py# Unit tests for Subscription model
-├── LICENSE                          # License for the project
-├── main.py                          # Main entry point
-├── plan.md                          # Project planning and roadmap
-├── README.md                        # Project documentation
-├── run_tests.sh                     # Bash script to run tests
-├── test.db                          # Test database file
-└── tui/                             # Text-based UI files
-```
-
----
-
 ## Roadmap
 
 ### Core Features
@@ -181,8 +141,7 @@ financli/
 - [x] CLI command interface
 - [x] CSV exports
 - [x] JSON exports
-- [ ] PDF exports
-- [ ] Reporting and summaries
+- [ ] PDF reports and summaries
 
 ### Account Type Support
 
@@ -193,7 +152,7 @@ financli/
 - [x] Deposit
 - [x] Withdraw
 - [x] Update
-- All tests passing
+- [x] All tests passing
 
 #### Credit Cards
 
@@ -202,7 +161,7 @@ financli/
 - [x] Deposit
 - [x] Withdraw
 - [x] Update
-- All tests passing
+- [x] All tests passing
 
 #### Store Cards
 
@@ -211,7 +170,7 @@ financli/
 - [x] Deposit
 - [x] Withdraw
 - [x] Update
-- All tests passing
+- [x] All tests passing
 
 #### Loans
 
@@ -219,20 +178,21 @@ financli/
 - [x] Close account
 - [x] Deposit
 - [x] Update
+- [x] All tests passing
 
 #### Bills
 
 - [x] Open account
 - [x] Close account
 - [x] Update
-- All tests passing
+- [x] All tests passing
 
 #### Subscriptions
 
 - [x] Open account
 - [x] Close account
 - [x] Update
-- All tests passing
+- [x] All tests passing
 
 ### Transactions
 
