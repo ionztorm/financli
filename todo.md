@@ -39,6 +39,9 @@
 
 - [x] implement exporting in CSV and JSON format
 - [ ] implement PDF reporting
+
+  - [ ] Research PDF templating. Plain text will be garbo.
+
 - [ ] implement CLI transaction filtering
 
 ## Import
